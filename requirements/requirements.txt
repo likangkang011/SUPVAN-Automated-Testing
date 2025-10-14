@@ -1,0 +1,9 @@
+# 1.生成依赖文件：当项目开发完成后，通过命令将当前安装的依赖导出到 requirements.txt
+# pip freeze > requirements
+# 2.安装依赖：新成员拉取项目代码后，通过以下命令一键安装所有依赖
+# pip install -r requirements
+#
+# 注意事项
+# 避免冗余依赖：定期清理不再使用的依赖（如通过 pip-autoremove 工具），防止依赖文件膨胀。
+# 锁定版本优先：生产环境建议明确指定依赖版本（如 requests==2.31.0），而非使用模糊版本（如 requests>=2.0），避免自动升级导致兼容问题。
+# 纳入版本控制：必须将 requirements/ 目录下的核心依赖文件（如 requirements.txt、package.json）提交到 Git 等版本控制系统，确保团队共享。
