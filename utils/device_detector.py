@@ -52,7 +52,6 @@ class DeviceDetector:
             ).strip()
 
             # 4. 获取应用包名（如果需要固定测试某个APP）
-            # 这里以之前的打印机APP为例，可根据实际情况修改
             app_package = "com.fhit.app_iprinter"
             app_activity = ".ui.home.activity.HomeActivity"
 

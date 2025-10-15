@@ -1,7 +1,7 @@
 import pytest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
-from utils.device_detector import DeviceDetector  # 导入自动探测工具
+from utils.device_detector import DeviceDetector
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
@@ -23,7 +23,7 @@ def handle_privacy_agreement(driver):
         print(f"未检测到隐私协议弹窗或处理失败: {str(e)}")
 
 
-@pytest.fixture(scope="session")  # 正确应用到driver fixture
+@pytest.fixture(scope="session")
 def driver():
     # 在fixture内部获取设备配置，确保获取最新状态
     device_config = DeviceDetector.select_device()
