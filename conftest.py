@@ -4,7 +4,7 @@ from appium.options.android import UiAutomator2Options
 from utils.device_detector import DeviceDetector  # 导入自动探测工具
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 
 
 def handle_privacy_agreement(driver):
@@ -12,7 +12,7 @@ def handle_privacy_agreement(driver):
     try:
         # 等待隐私协议弹窗出现（最多等待10秒）
         agree_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((
+            ec.element_to_be_clickable((
                 AppiumBy.ID,
                 "com.fhit.app_iprinter:id/tvUserAgreementConfirm"
             ))
