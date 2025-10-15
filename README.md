@@ -4,6 +4,7 @@
 | `config/`       | 项目配置中心（设备、定位、环境）   |
 | `data/`         | 测试数据存储（JSON/Excel） |
 | `logs/`         | 自动生成的测试日志          |
+| `reports/`      | 自动生成的测试报告          |
 | `page_objects/` | 页面对象封装（POM 核心）     |
 | `reports/`      | 自动生成的测试报告（HTML）    |
 | `requirements/` | 依赖清单               |
