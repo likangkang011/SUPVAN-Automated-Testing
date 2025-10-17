@@ -1,0 +1,32 @@
+#activity:.ui.home.activity.HomeActivity
+
+
+switch_device:
+  by: ID
+  value: com.fhit.app_iprinter:id/tvDeviceName
+  desc: "左上角切换设备按钮"
+
+support:
+  by: ID
+  value: com.fhit.app_iprinter:id/tvCustomerService
+  desc: "客服按钮"
+
+tutorial:
+  by: ID
+  value: com.fhit.app_iprinter:id/tvHomeCourse
+  desc: "教程按钮"
+
+banner:
+  by: XPATH
+  value: //androidx.recyclerview.widget.RecyclerView/android.widget.ImageView
+  desc: "banner图"
+
+connect:
+  by: ID
+  value: com.fhit.app_iprinter:id/tvGoConnect
+  desc: "去连接按钮"
+
+cable editing:
+  by: XPATH
+  value: //android.widget.TextView[@text="线缆编辑"]
+  desc: "金刚区线缆编辑"

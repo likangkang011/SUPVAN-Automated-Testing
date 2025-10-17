@@ -40,6 +40,8 @@ def driver():
     options.app_activity = ".ui.home.activity.HomeActivity"
     options.auto_grant_permissions = True
     options.no_reset = False
+    options.skip_device_initialization = False
+    options.skip_server_installation = False
 
     # 启动driver（关键：先初始化驱动）
     driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
