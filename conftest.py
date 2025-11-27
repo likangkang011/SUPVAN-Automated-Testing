@@ -1,3 +1,4 @@
+import os
 import pytest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -7,10 +8,42 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 
+# SPECIAL_PERMISSIONS = {
+#     "android.permission.WRITE_SETTINGS",
+#     "android.permission.SYSTEM_ALERT_WINDOW",
+#     "android.permission.MANAGE_EXTERNAL_STORAGE",
+#     "android.permission.REQUEST_INSTALL_PACKAGES",
+#     "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+# }
+
+# def grant_all_permissions(package):
+#     print(">>> 开始自动授予系统权限...")
+#
+#     result = os.popen(
+#         f"adb shell dumpsys package {package}"
+#     ).read().splitlines()
+#
+#     for line in result:
+#         line = line.strip()
+#
+#         if "permission" in line and "android.permission" in line:
+#             perm = line.split(":")[0].strip()
+#
+#             # 跳过无法通过 adb 授权的特殊权限
+#             if perm in SPECIAL_PERMISSIONS:
+#                 print(f"跳过特殊权限（需手动授权）：{perm}")
+#                 continue
+#
+#             os.system(f"adb shell pm grant {package} {perm}")
+#             print(f"已授权：{perm}")
+#
+#     print(">>> 权限授予完成\n")
+
+
+
 def handle_privacy_agreement(driver):
-    """自动处理隐私协议弹窗（工具函数，非fixture）"""
+    """自动处理隐私协议弹窗"""
     try:
-        # 等待隐私协议弹窗出现（最多等待10秒）
         agree_button = WebDriverWait(driver, 10).until(
             ec.element_to_be_clickable((
                 AppiumBy.ID,
@@ -20,17 +53,18 @@ def handle_privacy_agreement(driver):
         agree_button.click()
         print("已自动同意隐私协议")
     except Exception as e:
-        print(f"未检测到隐私协议弹窗或处理失败: {str(e)}")
+        print(f"未检测到隐私协议弹窗: {str(e)}")
 
 
 @pytest.fixture(scope="session")
 def driver():
-    # 在fixture内部获取设备配置，确保获取最新状态
+
+    # 自动检测设备
     device_config = DeviceDetector.select_device()
     if not device_config:
         pytest.fail("未检测到任何连接的设备，请检查设备连接")
 
-    # 初始化配置
+    # Appium 配置
     options = UiAutomator2Options()
     options.platform_name = "Android"
     options.platform_version = device_config.get("platform_version")
@@ -43,13 +77,15 @@ def driver():
     options.skip_device_initialization = False
     options.skip_server_installation = False
 
-    # 启动driver（关键：先初始化驱动）
+    # 启动 Appium driver
     driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
-    # 驱动初始化后再处理隐私协议（时机正确）
+    # # 📌 在 driver 启动后立即执行权限授权（最佳时机）
+    # grant_all_permissions("com.fhit.app_iprinter")
+
+    # 📌 然后处理隐私协议弹窗
     handle_privacy_agreement(driver)
 
-    yield driver  # 提供driver给测试用例
+    yield driver
 
-    # 测试结束后关闭driver
     driver.quit()
