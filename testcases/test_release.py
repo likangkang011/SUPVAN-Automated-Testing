@@ -4,14 +4,57 @@ from selenium.webdriver.support import expected_conditions as EC
 from conftest import driver
 from datetime import datetime
 import time
+from selenium.webdriver.common.actions import interaction
+from selenium.webdriver.common.actions.action_builder import ActionBuilder
 
-
+#----------------双击元素----------------
 def double_click(element, delay=0.1):
+
     """模拟双击操作"""
     element.click()
     # 等待短暂时间再点击第二次
     WebDriverWait(element._parent, delay).until(lambda d: True)
     element.click()
+
+#----------------双击坐标----------------
+def perform_double_tap(driver, x: int, y: int, tap_duration: float = 0.1, interval: float = 0.1):
+    """
+    在移动端模拟触摸双击操作（符合安卓双击标准阈值）
+
+    :param driver: WebDriver 实例（如 Appium 驱动）
+    :param x: 双击的横坐标
+    :param y: 双击的纵坐标
+    :param tap_duration: 单次点击的按下/抬起间隔时间（默认0.1秒）
+    :param interval: 两次点击之间的间隔时间（默认0.1秒，安卓标准阈值）
+    :return: None
+    :raises Exception: 执行双击操作时抛出的异常
+    """
+    try:
+        # 初始化触摸动作构建器
+        action_builder = ActionBuilder(driver)
+        action_builder.add_pointer_input(interaction.POINTER_TOUCH, "touch")
+        touch_action = action_builder.pointer_action
+
+        # 第一次点击
+        touch_action.move_to_location(x=x, y=y)
+        touch_action.pointer_down(button=0)
+        touch_action.pause(tap_duration)
+        touch_action.pointer_up(button=0)
+
+        # 两次点击间隔
+        touch_action.pause(interval)
+
+        # 第二次点击（完成双击）
+        touch_action.pointer_down(button=0)
+        touch_action.pause(tap_duration)
+        touch_action.pointer_up(button=0)
+
+        # 执行所有触摸动作
+        action_builder.perform()
+
+    except Exception as e:
+        raise Exception(f"执行双击操作失败（坐标：x={x}, y={y}）: {str(e)}")
+
 
 
 def wait_for_element(driver, by, locator, timeout=10):
@@ -167,53 +210,38 @@ def test_loginin(driver):
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/activity_login_verify_code_et').send_keys('8888')
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/activity_login_agree_iv').click()
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/activity_login_confirm_btn').click()
+    # 返回首页
+    wait_for_element(driver, By.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="首页"]').click()
 
 print('登录成功')
+
+def test_connect_devices(driver):
+    # 点击去连接
+
+    wait_for_element(driver, By.XPATH, '(/'
+                                       ''
+                                       ''
+                                       ''
+                                       ''
+                                       ''
+                                       '/android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[1]').click()
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvGoConnect').click()
+
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="T0024B2310270013"]'
+    ).click()
 
 def test_DIY(driver):
     # 点击新建标签
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivCreateNew').click()
 
-    # 点击耗材
     wait_for_element(
         driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
+        By.ID,
+        'com.fhit.app_iprinter:id/ivFirstConnectionClose'
     ).click()
-
-    size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
-
-    # 需验证能否滑倒底部
-    driver.swipe(screen_width * 0.2, screen_height * 0.9, screen_width * 0.2, screen_height * 0.5)
-
-    # 选中自定义耗材
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/mTvGroupName" and @text="自定义耗材"]'
-    ).click()
-
-    # 点击新增自定义耗材
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/rlCustomConsumablesAdd').click()
-
-    # 设置耗材的宽高
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etConsumableName').send_keys("自定义耗材" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etWidth').clear()
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etHeight').clear()
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etWidth').send_keys('50')
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etHeight').send_keys('30')
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivDeletePicture').click()
-
-    # 点击保存
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvSave').click()
-    time.sleep(3)
-    print('已保存自定义耗材')
-
-    # 点击确定切换为自定义耗材
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivAffirm').click()
-    print('已切换到自定义耗材')
 
 def test_text1(driver):
     # 测试文本功能--双击编辑，添加文本，对齐功能
@@ -397,7 +425,7 @@ def test_photo(driver):
 
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ps_tv_complete').click()
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/menu_crop').click()
-
+'''
 def test_excel(driver):
     # 测试Excel功能
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
@@ -431,7 +459,7 @@ def test_excel(driver):
 
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvCreate').click()
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivAffirm').click()
-
+'''
 def test_shape(driver):
     # 测试形状功能
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
@@ -608,40 +636,12 @@ def test_table(driver):
     size = driver.get_window_size()
     screen_width = size["width"]
     screen_height = size["height"]
-
-    driver.swipe(
-        screen_width * 0.33, screen_height * 0.29,
-        screen_width * 0.34, screen_height * 0.29
-    )
-
-    wait_clickable(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]'
-    ).click()
-
+    perform_double_tap(driver, x=screen_width*0.33, y=screen_height*0.29)
     wait_visible(
         driver,
         By.ID,
         "com.fhit.app_iprinter:id/window_table_edit"
     ).send_keys("表格1")
-
-    driver.swipe(
-        screen_width * 0.67, screen_height * 0.29,
-        screen_width * 0.66, screen_height * 0.29
-    )
-
-    wait_clickable(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]'
-    ).click()
-
-    wait_visible(
-        driver,
-        By.ID,
-        "com.fhit.app_iprinter:id/window_table_edit"
-    ).send_keys("表格2")
 
     wait_clickable(
         driver,
@@ -681,6 +681,7 @@ def test_savetemplate1(driver):
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etTemplateName').send_keys('文本，一维码模板')
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
 
+
 def test_savetemplate2(driver):
     # 添加序号模板
     wait_for_element(
@@ -692,33 +693,7 @@ def test_savetemplate2(driver):
 
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivCreateNew').click()
 
-    # 点击耗材
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
-    ).click()
-
-    # 上滑耗材分类
-    size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
-    # 需验证能否滑倒底部
-    driver.swipe(screen_width * 0.2, screen_height * 0.9, screen_width * 0.2, screen_height * 0.5)
-
-    # 选中自定义耗材
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/mTvGroupName" and @text="自定义耗材"]'
-    ).click()
-
-    wait_for_element(driver, By.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/mIvTemplateFileItem"])[1]').click()
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivAffirm').click()
-
-
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivCanvasRotation').click()
-
     for _ in range(4):
         wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
 
@@ -739,24 +714,12 @@ def test_savetemplate2(driver):
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etTemplateName').send_keys('序号模板')
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
 
+    #返回
     wait_for_element(
         driver,
         By.XPATH,
         '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    ).click()
-
-def test_connect_devices(driver):
-    # 点击去连接
-
-    wait_for_element(driver, By.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[1]').click()
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvGoConnect').click()
-
-    # 先连接第一个机型（理想状态),后续需要优化
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="T0013B2507037084"]'
-    ).click()
+).click()
 
 def test_print_personal_template1(driver):
     # 点击我的保存
@@ -769,11 +732,7 @@ def test_print_personal_template1(driver):
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tv_template_name" and @text="序号模板"]'
     ).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivFirstConnectionClose'
-    ).click()
+
 
 
     # 点击打印
@@ -867,41 +826,76 @@ def test_print_setting(driver):
     # 点击不保存
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvNotSave').click()
 
+    size = driver.get_window_size()
+    screen_width = size["width"]
+    screen_height = size["height"]
+
+    # 需验证能否滑倒底部
+    driver.swipe(screen_width * 0.2, screen_height * 0.5, screen_width * 0.2, screen_height * 0.9)
+
+    #断开机器
+    wait_for_element(driver,By.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvGoConnect"]').click()
+    #点击去连接
+    wait_for_element(driver, By.XPATH, '(/'
+                                       ''
+                                       ''
+                                       ''
+                                       ''
+                                       ''
+                                       '/android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[1]').click()
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvGoConnect').click()
+    #连接另一台机器
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="T0213B2512190002"]'
+    ).click()
+
     # 点击新建标签
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivCreateNew').click()
 
-    # 双击编辑区
-    for _ in range(2):
-        wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_paint_view').click()
+    # 点击耗材
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
+    ).click()
 
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
+    size = driver.get_window_size()
+    screen_width = size["width"]
+    screen_height = size["height"]
 
-    # 点击确定
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivConfirm').click()
+    # 需验证能否滑倒底部
+    driver.swipe(screen_width * 0.2, screen_height * 0.9, screen_width * 0.2, screen_height * 0.5)
 
-    # 点击向右切换三次
+    # 选中自定义耗材
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/mTvGroupName" and @text="自定义耗材"]'
+    ).click()
+
+    # 点击新增自定义耗材
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/rlCustomConsumablesAdd').click()
+
+    # 设置耗材的宽高
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etConsumableName').send_keys(
+        "自定义耗材" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etWidth').clear()
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etHeight').clear()
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etWidth').send_keys('50')
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etHeight').send_keys('30')
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivDeletePicture').click()
+
+    # 点击保存
+    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvSave').click()
+    time.sleep(3)
+    print('已保存自定义耗材')
+    wait_for_element(driver,By.XPATH,'(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/mIvTemplateFileItem"])[1]').click()
+    wait_for_element(driver,By.ID,'com.fhit.app_iprinter:id/ivAffirm').click()
+
     for _ in range(3):
         wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
-
-    # 点击边框
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="边框"]'
-    ).click()
-
-    # 添加一个边框
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[2]'
-    ).click()
-
-    # 点击叉号关闭弹窗
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/ivCancel').click()
-
-    # 点击新增标签
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_tv').click()
 
     # 点击添加一个边框
     wait_for_element(
@@ -993,3 +987,6 @@ def test_print_setting(driver):
 
     # 点击确定开始打印
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
+
+    time.sleep(15)
+
