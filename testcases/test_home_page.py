@@ -1,5 +1,4 @@
 from page_objects.home_page import home_Page
-from page_objects.print_page import home_Page
 from page_objects.base_page import BasePage
 import time
 

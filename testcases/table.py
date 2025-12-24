@@ -34,7 +34,7 @@ print(size)
 screen_width = size["width"]
 screen_height = size["height"]
 
-#通过拖拽的方式点到其中之一的表格进行输入            *******需要获得用屏幕比例滑动（不同机型屏幕尺寸不同）
+#通过拖拽的方式点到其中之一的表格进行输入            *******需要获得屏幕比例滑动（不同机型屏幕尺寸不同）
 driver.swipe(screen_width*0.33,screen_height*0.29,screen_width*0.34,screen_height*0.29)
 time.sleep(2)
 driver.find_element(By.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]').click()
