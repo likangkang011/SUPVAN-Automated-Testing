@@ -62,6 +62,8 @@ def swipe_up(driver, duration=800):
 
     driver.swipe(start_x, start_y, end_x, end_y, duration)
 
+
+
 #----------------双击元素----------------
 def double_click(element, delay=0.1):
 
