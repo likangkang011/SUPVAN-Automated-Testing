@@ -146,11 +146,7 @@ def wait_disappear(driver, by, locator, timeout=20):
 '''
 # 进入脱机体验页
 def enter_device_select_page(driver):
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvDeviceName'
-    ).click()
+    wait_for_element(driver,By.ID,'com.fhit.app_iprinter:id/tvDeviceName').click()
 
 # 检查脱机体验机型--获取当前页面所有机型
 def get_models_on_current_page(driver):
@@ -577,7 +573,7 @@ def test_excel(driver):
     wait_for_element(
         driver,
         By.XPATH,
-        '//android.widget.TextView[@resource-id="android:id/title" and @text="1 商品.xls"]'
+        '//android.widget.TextView[@resource-id="android:id/title" and @text="商品测试数据.xlsx"]'
     ).click()
 
     wait_for_element(
@@ -883,7 +879,7 @@ def test_print_personal_template1(driver):
     wait_disappear(
         driver,
         By.ID,
-    'com.fhit.app_iprinter:id/btCancel',
+    'com.fhit.app_iprinter:id/btCancel'
     )
 
     # 点击模板
@@ -911,7 +907,7 @@ def test_print_personal_template2(driver):
     wait_disappear(
         driver,
         By.ID,
-    'com.fhit.app_iprinter:id/btCancel',
+    'com.fhit.app_iprinter:id/btCancel'
     )
 
     wait_clickable(
@@ -921,14 +917,12 @@ def test_print_personal_template2(driver):
     ).click()
 
     # 设置excel打印范围
-    # 安卓端暂时有bug,等待实现
-    # 点击确定
     wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
 
     wait_disappear(
         driver,
         By.ID,
-    'com.fhit.app_iprinter:id/btCancel',
+    'com.fhit.app_iprinter:id/btCancel'
     )
 
 def test_print_system_template(driver):
@@ -937,7 +931,7 @@ def test_print_system_template(driver):
     wait_for_element(
         driver,
         By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[4]'
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="模板"]'
     ).click()
 
     # 点击系统模板
@@ -1133,5 +1127,5 @@ def test_DIY(driver):
     wait_disappear(
         driver,
         By.ID,
-    'com.fhit.app_iprinter:id/btCancel',
+    'com.fhit.app_iprinter:id/btCancel'
     )
