@@ -141,7 +141,6 @@ def wait_disappear(driver, by, locator, timeout=20):
         EC.invisibility_of_element_located((by, locator))
     )
 
-
 #----------------测试用例----------------
 '''
 # 进入脱机体验页
