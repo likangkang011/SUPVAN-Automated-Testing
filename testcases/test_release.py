@@ -1,3 +1,9 @@
+import sys
+import os
+
+# 添加项目根目录到sys.path，解决conftest导入问题
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -10,13 +16,14 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0109A2024041502"  # 第一台打印机编号（官方耗材）
-device_number2 = "T0171A2504150001"  # 第二台打印机编号(自定义耗材)
+device_number1 = "T0013B2507037084"  # 第一台打印机编号（官方耗材）
+device_number2 = "T0013B2411226666"  # 第二台打印机编号(自定义耗材)
 telephone_number = "17777786604"     # 登录手机号
-diy_width = "30"                     # 自定义耗材宽度
+diy_width = "40"                     # 自定义耗材宽度
 diy_height = "20"                    # 自定义耗材高度
 diy_gap = "8"                        # 自定义耗材间隙
 
+"""
 # ----------------脱机体验机型列表----------------
 EXPECTED_MODELS = {
     # T系列
@@ -48,6 +55,7 @@ EXCLUDE_TEXTS = {
     "BP系列条码机",
     "A4便携热转印打印机",
 }
+"""
 
 # ----------------页面上滑----------------
 
@@ -185,75 +193,85 @@ def wait_disappear(driver, by, locator, timeout=20):
 
 
 # ----------------测试用例----------------
-'''
-# 进入脱机体验页
-def enter_device_select_page(driver):
-    wait_for_element(driver,By.ID,'com.fhit.app_iprinter:id/tvDeviceName').click()
 
-# 检查脱机体验机型--获取当前页面所有机型
-def get_models_on_current_page(driver):
-    models = set()
+# # 进入脱机体验页
+# def enter_device_select_page(driver):
+#     wait_for_element(driver, AppiumBy.ID, 'com.fhit.app_iprinter:id/tvDeviceName').click()
 
-    texts = driver.execute_script(
-        "mobile: findElements",
-        {
-            "strategy": "class name",
-            "selector": "android.widget.TextView"
-        }
-    )
+# # 检查脱机体验机型--获取当前页面所有机型
+# def get_models_on_current_page(driver):
+#     models = set()
 
-    for el in texts:
-        text = el.get("text", "").strip()
-        if text and text not in EXCLUDE_TEXTS:
-            models.add(text)
+#     # 使用Appium的find_elements方法替代execute_script，更可靠
+#     text_elements = driver.find_elements(AppiumBy.CLASS_NAME, "android.widget.TextView")
 
-    return models
+#     for el in text_elements:
+#         try:
+#             text = el.text.strip()
+#             if text and text not in EXCLUDE_TEXTS:
+#                 models.add(text)
+#         except Exception as e:
+#             print(f"获取元素文本失败: {e}")
+#             continue
 
-# 检查脱机体验机型--滑动获取所有机型
-def get_all_models_by_swipe(driver, max_swipes=10):
-    all_models = set()
-    no_new_rounds = 0
+#     return models
 
-    for _ in range(max_swipes):
-        current_models = get_models_on_current_page(driver)
-        before = len(all_models)
+# # 检查脱机体验机型--滑动获取所有机型
+# def get_all_models_by_swipe(driver, max_swipes=10):
+#     all_models = set()
+#     no_new_rounds = 0
 
-        all_models.update(current_models)
+#     for i in range(max_swipes):
+#         current_models = get_models_on_current_page(driver)
+#         before = len(all_models)
 
-        if len(all_models) == before:
-            no_new_rounds += 1
-        else:
-            no_new_rounds = 0
+#         all_models.update(current_models)
 
-        if no_new_rounds >= 2:
-            break
+#         if len(all_models) == before:
+#             no_new_rounds += 1
+#             print(f"第{i+1}次滑动，未发现新机型，连续无新机型次数: {no_new_rounds}")
+#         else:
+#             no_new_rounds = 0
+#             print(f"第{i+1}次滑动，发现新机型，当前机型总数: {len(all_models)}")
 
-        swipe_up(driver)
-        time.sleep(0.5)
+#         if no_new_rounds >= 2:
+#             print("连续两次未发现新机型，停止滑动")
+#             break
 
-    return all_models
+#         swipe_up(driver)
+#         time.sleep(0.5)
 
-# 检查脱机体验机型--检查机型是否正确
-def assert_all_models_match(driver):
-    actual_models = get_all_models_by_swipe(driver)
+#     return all_models
 
-    expected_models = EXPECTED_MODELS
+# # 检查脱机体验机型--检查机型是否正确
+# def assert_all_models_match(driver):
+#     actual_models = get_all_models_by_swipe(driver)
+#     expected_models = EXPECTED_MODELS
 
-    extra = actual_models - expected_models
-    missing = expected_models - actual_models
+#     extra = actual_models - expected_models
+#     missing = expected_models - actual_models
 
-    assert not extra and not missing, (
-        f"\n页面多出的机型: {extra}"
-        f"\n页面缺少的机型: {missing}"
-    )
+#     # 生成更友好的错误信息
+#     error_msg = []
+#     if extra:
+#         error_msg.append(f"页面多出的机型: {sorted(extra)}")
+#     if missing:
+#         error_msg.append(f"页面缺少的机型: {sorted(missing)}")
+#     if error_msg:
+#         error_msg.insert(0, f"机型校验失败！实际机型: {sorted(actual_models)}")
+#         error_msg.insert(1, f"预期机型: {sorted(expected_models)}")
+#         assert False, "\n".join(error_msg)
+#     else:
+#         print(f"机型校验成功！所有机型匹配，共{len(actual_models)}个机型")
 
-def test_offline_device_models(driver):
-    """
-    校验脱机体验页机型是否与配置一致
-    """
-    enter_device_select_page(driver)
-    assert_all_models_match(driver)
-'''
+# def test_offline_device_models(driver):
+#     """
+#     校验脱机体验页机型是否与配置一致
+#     """
+#     print("开始执行脱机体验页机型校验测试")
+#     enter_device_select_page(driver)
+#     assert_all_models_match(driver)
+#     print("脱机体验页机型校验测试执行完成")
 
 
 def test_add_all_function(driver):
@@ -262,6 +280,12 @@ def test_add_all_function(driver):
     :param driver: WebDriver实例
     :return: None
     """
+    # 返回首页
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivActivityOfflineExperienceBack').click()
+
     # 点击新建标签
     wait_for_element(
         driver,

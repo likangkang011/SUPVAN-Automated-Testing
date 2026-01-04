@@ -5,3 +5,4 @@ __pycache__/config.cpython-313.pyc
 testcases/__pycache__/test_release_home.cpython-313-pytest-8.4.2.pyc
 testcases/__pycache__/test_release_home.cpython-313.pyc
 testcases/__pycache__/test_release.cpython-313.pyc
+__pycache__/conftest.cpython-313.pyc
