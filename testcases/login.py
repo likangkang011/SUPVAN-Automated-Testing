@@ -14,19 +14,29 @@ options.no_reset = True
 
 # 使用 options 参数而非 desired_capabilities
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
-#进入主页，点击我的
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/htwiHomeMine").click()
-#点击头像
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/rlPersonalInformationEnter").click()
+# 进入主页，点击我的
+driver.find_element(By.ID, "com.fhit.app_iprinter:id/htwiHomeMine").click()
+# 点击头像
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/rlPersonalInformationEnter").click()
 time.sleep(1)
-#输入手机号
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/activity_login_phone_et").send_keys("19711916427")
-#输入万能验证码8888
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/activity_login_verify_code_et").send_keys("8888")
-#勾选同意隐私政策
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/activity_login_agree_iv").click()
-#点击登录
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/activity_login_confirm_btn").click()
+# 输入手机号
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/activity_login_phone_et").send_keys("19711916427")
+# 输入万能验证码8888
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/activity_login_verify_code_et").send_keys("8888")
+# 勾选同意隐私政策
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/activity_login_agree_iv").click()
+# 点击登录
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/activity_login_confirm_btn").click()
 time.sleep(3)
 
 # driver.find_element(By.ID, 'com.fhit.app_iprinter:id/ivConfirm').click()

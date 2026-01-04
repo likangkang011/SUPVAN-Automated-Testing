@@ -40,7 +40,6 @@ from selenium.webdriver.support import expected_conditions as ec
 #     print(">>> 权限授予完成\n")
 
 
-
 def handle_privacy_agreement(driver):
     """自动处理隐私协议弹窗"""
     try:

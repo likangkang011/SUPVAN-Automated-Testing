@@ -10,7 +10,8 @@ class BasePage:
 
     def find(self, locator, timeout=None):
         """等待元素可见并返回元素"""
-        wait = self.wait if timeout is None else WebDriverWait(self.driver, timeout)
+        wait = self.wait if timeout is None else WebDriverWait(
+            self.driver, timeout)
         return wait.until(EC.visibility_of_element_located(locator))
 
     def click(self, locator):

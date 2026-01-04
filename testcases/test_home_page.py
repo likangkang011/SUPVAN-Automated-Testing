@@ -3,7 +3,6 @@ from page_objects.base_page import BasePage
 import time
 
 
-
 class TestSwitchDevice:
 
     def test_click_switch_device(self, driver):

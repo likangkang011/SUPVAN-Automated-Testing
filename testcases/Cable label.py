@@ -17,23 +17,33 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 点击新建标签按钮
-driver.find_element(By.XPATH, '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
 time.sleep(1)
 
 # 点击下一页
-driver.find_element(By.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv").click()
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv").click()
 time.sleep(1)
 
 # 点击下一页
-driver.find_element(By.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv").click()
+driver.find_element(
+    By.ID,
+    "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv").click()
 time.sleep(1)
 
 # 点击线缆标签
-driver.find_element(By.XPATH,  '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text=\'线缆标签\'])[1]').click()
+driver.find_element(
+    By.XPATH,
+    '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text=\'线缆标签\'])[1]').click()
 time.sleep(1)
 
 # 输入内容
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/etManualFirstFoldedContent').send_keys('测试')
+driver.find_element(
+    By.ID,
+    'com.fhit.app_iprinter:id/etManualFirstFoldedContent').send_keys('测试')
 time.sleep(3)
 
 # 点击确定
@@ -44,4 +54,3 @@ print("已完成")
 
 # 退出App
 driver.quit()
-

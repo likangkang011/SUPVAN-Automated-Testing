@@ -2,6 +2,7 @@ import subprocess
 import re
 from typing import List, Dict
 
+
 class DeviceDetector:
     @staticmethod
     def get_connected_devices() -> List[str]:
@@ -9,11 +10,11 @@ class DeviceDetector:
         try:
             # 执行 adb devices 命令，获取连接的设备列表
             result = subprocess.check_output(
-                ["adb", "devices"], 
-                stderr=subprocess.STDOUT, 
+                ["adb", "devices"],
+                stderr=subprocess.STDOUT,
                 text=True
             )
-            
+
             # 解析输出，提取设备序列号（排除标题行和离线设备）
             devices = []
             for line in result.splitlines():
@@ -93,7 +94,7 @@ class DeviceDetector:
                     text=True
                 ).strip()
                 print(f"{i}. {udid} ({model})")
-            except:
+            except BaseException:
                 print(f"{i}. {udid} (未知型号)")
 
         # 输入选择

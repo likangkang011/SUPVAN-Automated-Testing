@@ -19,4 +19,6 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 测试点击按钮
-driver.find_element(By.XPATH, '//android.widget.TextView[@text="线缆编辑"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.TextView[@text="线缆编辑"]').click()

@@ -17,24 +17,28 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 点击新建标签按钮
-driver.find_element(By.XPATH, '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
 time.sleep(1)
 
 # 点击保存
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/my_activity_main_lp_save_iv').click()
+driver.find_element(
+    By.ID,
+    'com.fhit.app_iprinter:id/my_activity_main_lp_save_iv').click()
 time.sleep(1)
 
 # 输入模板名称
-driver.find_element(By.ID,'com.fhit.app_iprinter:id/etTemplateName').send_keys("测试" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+driver.find_element(
+    By.ID, 'com.fhit.app_iprinter:id/etTemplateName').send_keys(
+        "测试" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 time.sleep(1)
 
 # 点击保存
-driver.find_element(By.ID,'com.fhit.app_iprinter:id/tvConfirm').click()
+driver.find_element(By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
 time.sleep(5)
 
 print("已完成")
 
 # 退出App
 driver.quit()
-
-

@@ -15,20 +15,28 @@ options.no_reset = True
 # 使用 options 参数而非 desired_capabilities
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
-#点击新建标签按钮
-driver.find_element(By.XPATH, '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+# 点击新建标签按钮
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
 time.sleep(1)
 
-#点击图片
-driver.find_element(By.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="图片"]').click()
+# 点击图片
+driver.find_element(
+    By.XPATH,
+    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="图片"]').click()
 time.sleep(1)
 
-#点击从相册中选择
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/my_dialog_picture_photo_album_tv').click()
+# 点击从相册中选择
+driver.find_element(
+    By.ID,
+    'com.fhit.app_iprinter:id/my_dialog_picture_photo_album_tv').click()
 time.sleep(1)
 
-#选择相册里的第一张图片
-driver.find_element(By.XPATH, '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]').click()
+# 选择相册里的第一张图片
+driver.find_element(
+    By.XPATH,
+    '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]').click()
 time.sleep(1)
 
 # 点击已完成
@@ -44,5 +52,3 @@ print("已完成")
 
 # 退出App
 driver.quit()
-
-

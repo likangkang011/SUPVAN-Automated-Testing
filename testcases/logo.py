@@ -15,19 +15,30 @@ options.app_activity = (".ui.home.activity.HomeActivity")
 options.no_reset = True
 
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
-#进入编辑页
-driver.find_element(By.XPATH, '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+# 进入编辑页
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
 time.sleep(1)
-#切换下一页功能(4次）
-driver.find_element(By.XPATH,'//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(By.XPATH,'//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(By.XPATH,'//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(By.XPATH,'//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-#点击logo选项
-driver.find_element(By.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="logo"]').click()
+# 切换下一页功能(4次）
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+driver.find_element(
+    By.XPATH,
+    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+# 点击logo选项
+driver.find_element(
+    By.XPATH,
+    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="logo"]').click()
 time.sleep(5)
-#选择第一个logo图标
-driver.find_element(By.ID,"com.fhit.app_iprinter:id/ivLogo").click()
+# 选择第一个logo图标
+driver.find_element(By.ID, "com.fhit.app_iprinter:id/ivLogo").click()
 time.sleep(1)
 driver.quit()
-
