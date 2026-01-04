@@ -1,3 +1,9 @@
+import sys
+import os
+
+# 添加项目根目录到sys.path，解决conftest导入问题
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,6 +24,7 @@ diy_width = "30"                     # 自定义耗材宽度
 diy_height = "20"                    # 自定义耗材高度
 diy_gap = "8"                        # 自定义耗材间隙
 
+"""
 # ----------------脱机体验机型列表----------------
 EXPECTED_MODELS = {
     # T系列
@@ -51,6 +58,7 @@ EXCLUDE_TEXTS = {
 }
 
 # ----------------页面上滑----------------
+"""
 
 
 def swipe_up(driver, duration=800):

@@ -1,14 +1,9 @@
-testcases/__pycache__/test_release.cpython-313-pytest-8.4.2.pyc
-__pycache__/conftest.cpython-313-pytest-8.4.2.pyc
-utils/__pycache__/device_detector.cpython-313.pyc
-__pycache__/config.cpython-313.pyc
-testcases/__pycache__/test_release_home.cpython-313-pytest-8.4.2.pyc
-testcases/__pycache__/test_release_home.cpython-313.pyc
-testcases/__pycache__/test_release.cpython-313.pyc
-.idea/inspectionProfiles/Project_Default.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/vcs.xml
-.idea/SUPVAN-Automated-Testing.iml
-.idea/modules.xml
-.idea/misc.xml
-.idea
+# 忽略.idea文件夹（核心规则）
+.idea/
+# 忽略Python字节码缓存文件夹（核心规则）
+__pycache__/
+
+# 忽略单独的.pyc字节码文件（防止个别未存入__pycache__的.pyc文件被提交）
+*.pyc
+*.pyo
+*.pyd
