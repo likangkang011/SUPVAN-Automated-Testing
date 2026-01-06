@@ -57,16 +57,12 @@ EXCLUDE_TEXTS = {
 }
 """
 # ----------------获取屏幕尺寸----------------
-def get_screen_size(driver):
-    """
-    获取当前屏幕尺寸
-    :param driver: WebDriver实例
-    :return: 包含宽度和高度的字典
-    """
-    size = driver.get_window_size()
-    width = size["width"]
-    height = size["height"]
-    return size
+#获取当前屏幕尺寸
+#:param driver: WebDriver实例
+#:return: 包含宽度和高度的字典
+size = driver.get_window_size()
+width = size["width"]
+height = size["height"]
     
 # ----------------页面上滑----------------
 
