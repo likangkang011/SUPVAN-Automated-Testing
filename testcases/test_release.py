@@ -56,7 +56,18 @@ EXCLUDE_TEXTS = {
     "A4便携热转印打印机",
 }
 """
-
+# ----------------获取屏幕尺寸----------------
+def get_screen_size(driver):
+    """
+    获取当前屏幕尺寸
+    :param driver: WebDriver实例
+    :return: 包含宽度和高度的字典
+    """
+    size = driver.get_window_size()
+    width = size["width"]
+    height = size["height"]
+    return size
+    
 # ----------------页面上滑----------------
 
 
@@ -67,9 +78,6 @@ def swipe_up(driver, duration=800):
     :param duration: 滑动持续时间，默认800ms
     :return: None
     """
-    size = driver.get_window_size()
-    width = size["width"]
-    height = size["height"]
 
     start_x = width * 0.5
     start_y = height * 0.75
@@ -280,11 +288,11 @@ def test_add_all_function(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    # 返回首页
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivActivityOfflineExperienceBack').click()
+#    # 返回首页
+#    wait_for_element(
+#        driver,
+#        By.ID,
+#        'com.fhit.app_iprinter:id/ivActivityOfflineExperienceBack').click()
 
     # 点击新建标签
     wait_for_element(
@@ -483,7 +491,8 @@ def test_text1(driver):
     wait_for_element(
         driver,
         By.ID,
-        'com.fhit.app_iprinter:id/ivCreateNew').click()
+        'com.fhit.app_iprinter:id/ivCreateNew'
+        ).click()
 
     wait_for_element(
         driver,
@@ -1163,10 +1172,8 @@ def test_table(driver):
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="表格"]'
     ).click()
 
-    size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
-    perform_double_tap(driver, x=screen_width * 0.33, y=screen_height * 0.29)
+
+    perform_double_tap(driver, x=width * 0.33, y=height * 0.29)
     wait_visible(
         driver,
         By.ID,
@@ -1192,9 +1199,6 @@ def test_prewiew(driver):
         By.ID,
         'com.fhit.app_iprinter:id/my_activity_main_lp_preview_tv').click()
 
-    size = driver.get_window_size()
-    width = size["width"]
-    height = size["height"]
 
     driver.swipe(
         width * 0.5,
@@ -1472,15 +1476,15 @@ def test_print_setting(driver):
         'com.fhit.app_iprinter:id/tvNotSave').click()
 
     size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
+    width = size["width"]
+    height = size["height"]
 
     # 需验证能否滑倒底部
     driver.swipe(
-        screen_width * 0.2,
-        screen_height * 0.5,
-        screen_width * 0.2,
-        screen_height * 0.9)
+        width * 0.2,
+        height * 0.5,
+        width * 0.2,
+        height * 0.9)
 
     # 断开机器
     wait_for_element(
@@ -1523,16 +1527,15 @@ def test_DIY(driver):
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
     ).click()
 
-    size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
+    width = size["width"]
+    height = size["height"]
 
     # 需验证能否滑倒底部
     driver.swipe(
-        screen_width * 0.2,
-        screen_height * 0.9,
-        screen_width * 0.2,
-        screen_height * 0.5)
+        width * 0.2,
+        height * 0.9,
+        width * 0.2,
+        height * 0.5)
 
     # 选中自定义耗材
     wait_for_element(
@@ -1733,16 +1736,13 @@ def test_DIY(driver):
         By.ID,
         'com.fhit.app_iprinter:id/etVShift').send_keys('16')
 
-    size = driver.get_window_size()
-    screen_width = size["width"]
-    screen_height = size["height"]
 
     # 打印设置页面上滑
     driver.swipe(
-        screen_width * 0.5,
-        screen_height * 0.5,
-        screen_width * 0.5,
-        screen_height * 0.4)
+        width * 0.5,
+        height * 0.5,
+        width * 0.5,
+        height * 0.4)
 
     # 切换翻转方式为水平翻转
     wait_for_element(
