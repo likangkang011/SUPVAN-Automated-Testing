@@ -91,44 +91,44 @@ def driver():
     driver.quit()
 
 
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """捕获测试用例的执行结果，在测试失败时截图"""
-    # 获取钩子方法的调用结果
-    outcome = yield
-    # 从结果中获取测试报告
-    report = outcome.get_result()
+# @pytest.hookimpl(tryfirst=True, hookwrapper=True)
+# def pytest_runtest_makereport(item, call):
+#     """捕获测试用例的执行结果，在测试失败时截图"""
+#     # 获取钩子方法的调用结果
+#     outcome = yield
+#     # 从结果中获取测试报告
+#     report = outcome.get_result()
     
-    # 只关注测试用例失败的情况
-    if report.when == 'call' and report.failed:
-        # 检查item是否有driver属性或者有fixture提供driver
-        driver = None
-        for fixture_name in item.fixturenames:
-            if fixture_name in item.funcargs:
-                fixture_value = item.funcargs[fixture_name]
-                # 检查fixture_value是否有save_screenshot方法
-                if hasattr(fixture_value, 'save_screenshot'):
-                    driver = fixture_value
-                    break
+#     # 只关注测试用例失败的情况
+#     if report.when == 'call' and report.failed:
+#         # 检查item是否有driver属性或者有fixture提供driver
+#         driver = None
+#         for fixture_name in item.fixturenames:
+#             if fixture_name in item.funcargs:
+#                 fixture_value = item.funcargs[fixture_name]
+#                 # 检查fixture_value是否有save_screenshot方法
+#                 if hasattr(fixture_value, 'save_screenshot'):
+#                     driver = fixture_value
+#                     break
         
-        if driver:
-            # 创建截图保存目录
-            screenshots_dir = os.path.join(os.getcwd(), 'screenshots')
-            if not os.path.exists(screenshots_dir):
-                os.makedirs(screenshots_dir)
+#         if driver:
+#             # 创建截图保存目录
+#             screenshots_dir = os.path.join(os.getcwd(), 'screenshots')
+#             if not os.path.exists(screenshots_dir):
+#                 os.makedirs(screenshots_dir)
             
-            # 生成截图文件名
-            timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            test_name = item.name.replace('/', '_').replace('::', '_')
-            screenshot_name = f"{test_name}_{timestamp}.png"
-            screenshot_path = os.path.join(screenshots_dir, screenshot_name)
+#             # 生成截图文件名
+#             timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+#             test_name = item.name.replace('/', '_').replace('::', '_')
+#             screenshot_name = f"{test_name}_{timestamp}.png"
+#             screenshot_path = os.path.join(screenshots_dir, screenshot_name)
             
-            # 截图并保存
-            try:
-                driver.save_screenshot(screenshot_path)
-                print(f"\n测试失败，截图已保存: {screenshot_path}")
-                # 将截图路径添加到测试报告中
-                if hasattr(report, 'extra'):
-                    report.extra.append(pytest.mark.extra(image=screenshot_path))
-            except Exception as e:
-                print(f"\n截图保存失败: {str(e)}")
+#             # 截图并保存
+#             try:
+#                 driver.save_screenshot(screenshot_path)
+#                 print(f"\n测试失败，截图已保存: {screenshot_path}")
+#                 # 将截图路径添加到测试报告中
+#                 if hasattr(report, 'extra'):
+#                     report.extra.append(pytest.mark.extra(image=screenshot_path))
+#             except Exception as e:
+#                 print(f"\n截图保存失败: {str(e)}")
