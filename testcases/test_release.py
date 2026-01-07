@@ -1,3 +1,4 @@
+from asyncio import wait_for
 import sys
 import os
 
@@ -56,17 +57,8 @@ EXCLUDE_TEXTS = {
     "A4便携热转印打印机",
 }
 """
-# ----------------获取屏幕尺寸----------------
-#获取当前屏幕尺寸
-#:param driver: WebDriver实例
-#:return: 包含宽度和高度的字典
-size = driver.get_window_size()
-width = size["width"]
-height = size["height"]
-    
+
 # ----------------页面上滑----------------
-
-
 def swipe_up(driver, duration=800):
     """页面上滑操作
 
@@ -74,7 +66,9 @@ def swipe_up(driver, duration=800):
     :param duration: 滑动持续时间，默认800ms
     :return: None
     """
-
+    size = driver.get_window_size()
+    width = size["width"]
+    height = size["height"]
     start_x = width * 0.5
     start_y = height * 0.75
     end_x = width * 0.5
@@ -473,7 +467,7 @@ def test_connect_devices(driver):
     wait_for_element(
         driver,
         By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'
+        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="T0024B2310270013"]'
     ).click()
 
 
@@ -489,7 +483,7 @@ def test_text1(driver):
         By.ID,
         'com.fhit.app_iprinter:id/ivCreateNew'
         ).click()
-
+    #关闭首次进入时的提示弹窗
     wait_for_element(
         driver,
         By.ID,
@@ -665,28 +659,26 @@ def test_font(driver):
         By.ID,
         'com.fhit.app_iprinter:id/ivConfirm').click()
 
-
 def test_inverse(driver):
     """测试文本功能--反色功能
 
-    :param driver: WebDriver实例
-    :return: None
+        :param driver: WebDriver实例
+        :return: None
     """
     wait_for_element(
         driver,
         By.XPATH,
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+        ).click()
 
     wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
+            driver,
+            By.ID,
+            'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
     wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
-
+            driver,
+            By.ID,
+            'com.fhit.app_iprinter:id/ivConfirm').click()
     for _ in range(5):
         wait_for_element(
             driver,
@@ -694,12 +686,211 @@ def test_inverse(driver):
             'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
 
     wait_for_element(
+            driver,
+            By.XPATH,
+            '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="反色"]').click()
+
+def test_test3(driver):
+    """测试文本功能--样式--自动换行
+
+    :param driver: WebDriver实例
+    :return: None
+    """
+    #新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    #回到功能栏首位置
+    for _ in range(6):
+        wait_for_element(
+            driver,
+            By.XPATH,
+            '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_left_iv"]'
+        ).click()
+    #点击文本
+    wait_for_element(
         driver,
         By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="反色"]'
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+        ).click()
+    #点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    #开启自动换行
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/sLayoutMode'
+    ).click()
+    #输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput').send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
+    #点击确定
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
+        ).click()
+def test_text4(driver):
+    #调整字宽（放大两次）
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    # 点击文本
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+    ).click()
+    #输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput').send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
+    #点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    #放大两次字宽
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivWordWidthAdd'
+    ).click()
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivWordWidthAdd'
+    ).click()
+    #点击确定
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
+        ).click()
+
+    #文字方向
+def test_text5(driver):
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    # 点击文本
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+    ).click()
+    # 输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput').send_keys('文字方向文字方向')
+    # 点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    #选择弧形文字方向
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivTextDirectionC'
+    ).click()
+    # 点击确定
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
+    ).click()
+#------------测试字效-----------------------------
+def test_text6(driver):
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    # 点击文本
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+    ).click()
+    # 输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput').send_keys('添加不同字效')
+    # 点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    #页面上滑
+    swipe_up(driver)
+    #单击字效开关（斜线）
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivEffectI'
+    ).click()
+    #下划线
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivEffectU'
+    ).click()
+    # 点击确定
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
     ).click()
 
-
+def test_text7(driver):
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv'
+    ).click()
+    #点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    #关闭自动换行
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/sLayoutMode'
+    ).click()
+    #开启自动字号
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivFontSizeAuto'
+    ).click()
+    #输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput'
+    ).send_keys('测试自动字号功能测试自动字号')
 def test_repeat(driver):
     """测试文本功能--重复份数
 
@@ -723,24 +914,18 @@ def test_repeat(driver):
         By.ID,
         'com.fhit.app_iprinter:id/my_dialog_repetition_iv_affirm').click()
 
-
+#---------------一维码----------------------
 def test_barcode(driver):
     """测试一维码功能
 
     :param driver: WebDriver实例
     :return: None
     """
+    # 新增标签
     wait_for_element(
         driver,
         By.ID,
         'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-
-    for _ in range(5):
-        wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_enter_left_iv').click()
-
     wait_for_element(
         driver,
         By.XPATH,
@@ -751,11 +936,94 @@ def test_barcode(driver):
         driver,
         By.ID,
         'com.fhit.app_iprinter:id/etInput').send_keys('6901236040287')
+    #关闭字符开关
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/sChars'
+    ).click()
     wait_for_element(
         driver,
         By.ID,
         'com.fhit.app_iprinter:id/ivAffirm').click()
-
+def test_barcode2(driver):
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]'
+    ).click()
+    #选择条码类型--CODE-11
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivDown').click()
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/label" and @text="CODE-11"]'
+    ).click()
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput').send_keys('12345678912')
+    #清空字符字号
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etCharacter'
+    ).clear()
+    #输入字符字号
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etCharacter'
+    ).send_keys('10')
+    #开启字符加粗
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/sCharsBold'
+    ).click()
+    #字符对齐方式选择居右对齐
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivAlignRight'
+    ).click()
+    #点击字体
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeFace'
+    ).click()
+    #下载更多字体
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'
+    ).click()
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[1]'
+    ).click()
+    #返回
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_font_back'
+    ).click()
+    #点击确定
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivAffirm'
+    ).click()
 
 def test_qrcode(driver):
     """测试二维码功能
@@ -1153,10 +1421,12 @@ def test_date(driver):
 
 def test_table(driver):
     """测试表格功能
-
     :param driver: WebDriver实例
     :return: None
     """
+    size = driver.get_window_size()
+    width = size["width"]
+    height = size["height"]
     wait_for_element(
         driver,
         By.ID,
@@ -1189,6 +1459,9 @@ def test_prewiew(driver):
     :param driver: WebDriver实例
     :return: None
     """
+    size = driver.get_window_size()
+    width = size["width"]
+    height = size["height"]
     # 测试预览功能
     wait_for_element(
         driver,
@@ -1458,6 +1731,9 @@ def test_print_setting(driver):
     :param driver: WebDriver实例
     :return: None
     """
+    size = driver.get_window_size()
+    width = size["width"]
+    height = size["height"]
     # 点击返回
     wait_for_element(
         driver,
@@ -1522,7 +1798,7 @@ def test_DIY(driver):
         By.XPATH,
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
     ).click()
-
+    size = driver.get_window_size()
     width = size["width"]
     height = size["height"]
 
