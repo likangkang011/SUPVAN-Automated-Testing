@@ -512,12 +512,12 @@ def test_text1(driver):
         By.ID,
         'com.fhit.app_iprinter:id/ivCreateNew'
         ).click()
-    #关闭首次进入时的提示弹窗(只有连接机器时候才出现---先隐藏）
-    #wait_for_element(
-    #    driver,
-    #    By.ID,
-    #    'com.fhit.app_iprinter:id/ivFirstConnectionClose'
-    #).click()
+    #关闭首次进入时的提示弹窗
+    wait_for_element(
+        driver,
+        By.ID,
+       'com.fhit.app_iprinter:id/ivFirstConnectionClose'
+    ).click()
 
     wait_for_element(
         driver,
