@@ -133,6 +133,37 @@ def perform_double_tap(driver, x: int, y: int,
         raise Exception(f"执行双击操作失败（坐标：x={x}, y={y}）: {str(e)}")
 
 
+# ----------------单击坐标----------------
+def perform_single_tap(driver, x: int, y: int, tap_duration: float = 0.1):
+    """
+    在移动端模拟触摸单击操作（符合安卓单击标准阈值）
+
+    :param driver: WebDriver 实例（如 Appium 驱动）
+    :param x: 单击的横坐标
+    :param y: 单击的纵坐标
+    :param tap_duration: 点击的按下/抬起间隔时间（默认0.1秒）
+    :return: None
+    :raises Exception: 执行单击操作时抛出的异常
+    """
+    try:
+        # 初始化触摸动作构建器
+        action_builder = ActionBuilder(driver)
+        action_builder.add_pointer_input(interaction.POINTER_TOUCH, "touch")
+        touch_action = action_builder.pointer_action
+
+        # 执行单击操作
+        touch_action.move_to_location(x=x, y=y)  # 移动到目标坐标
+        touch_action.pointer_down(button=0)      # 按下操作
+        touch_action.pause(tap_duration)         # 保持按下状态
+        touch_action.pointer_up(button=0)        # 抬起操作
+
+        # 执行所有触摸动作
+        action_builder.perform()
+
+    except Exception as e:
+        raise Exception(f"执行单击操作失败（坐标：x={x}, y={y}）: {str(e)}")
+
+
 # ----------------显示等待----------------
 def wait_for_element(driver, by, locator, timeout=10):
     """显示等待元素可见
@@ -445,7 +476,6 @@ def test_loginin(driver):
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="首页"]').click()
     print('登录成功')
 
-
 def test_connect_devices(driver):
     """连接设备测试
 
@@ -467,9 +497,8 @@ def test_connect_devices(driver):
     wait_for_element(
         driver,
         By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="T0024B2310270013"]'
+        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'
     ).click()
-
 
 def test_text1(driver):
     """测试文本功能--双击编辑，添加文本，对齐功能
@@ -483,12 +512,12 @@ def test_text1(driver):
         By.ID,
         'com.fhit.app_iprinter:id/ivCreateNew'
         ).click()
-    #关闭首次进入时的提示弹窗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivFirstConnectionClose'
-    ).click()
+    #关闭首次进入时的提示弹窗(只有连接机器时候才出现---先隐藏）
+    #wait_for_element(
+    #    driver,
+    #    By.ID,
+    #    'com.fhit.app_iprinter:id/ivFirstConnectionClose'
+    #).click()
 
     wait_for_element(
         driver,
@@ -841,7 +870,7 @@ def test_text6(driver):
     ).click()
     #页面上滑
     swipe_up(driver)
-    #单击字效开关（斜线）
+    #单击字效开关（倾斜）
     wait_for_element(
         driver,
         By.ID,
@@ -867,6 +896,12 @@ def test_text7(driver):
         By.ID,
         'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv'
     ).click()
+    #点击文本
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+    ).click()
     #点击样式
     wait_for_element(
         driver,
@@ -891,6 +926,68 @@ def test_text7(driver):
         By.ID,
         'com.fhit.app_iprinter:id/etInput'
     ).send_keys('测试自动字号功能测试自动字号')
+    # 点击确定--关闭样式弹窗
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
+    ).click()
+def test_text8(driver):
+    # 新增标签
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv'
+    ).click()
+    # 点击文本
+    wait_for_element(
+        driver,
+        By.XPATH,
+        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
+    ).click()
+    # 点击样式
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/tvTypeface'
+    ).click()
+    # 开启自动换行
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/sLayoutMode'
+    ).click()
+    #页面上滑（有些机型该页面看不到行间距）
+    swipe_up(driver)
+    #输入内容
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etInput'
+    ).send_keys('测试文本设置字间距和行间距测试文本设置字间距和行间距')
+    #设置字间距为10
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etFontSpace'
+    ).send_keys('10')
+    #设置行间距为-10
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etLineSpace'
+    ).clear()
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/etLineSpace'
+    ).send_keys('-10')
+    #关闭样式弹窗
+    wait_for_element(
+        driver,
+        By.ID,
+        'com.fhit.app_iprinter:id/ivConfirm'
+    ).click()
 def test_repeat(driver):
     """测试文本功能--重复份数
 
@@ -1001,6 +1098,8 @@ def test_barcode2(driver):
         By.ID,
         'com.fhit.app_iprinter:id/tvTypeFace'
     ).click()
+    #页面上滑可看到下载更多字体的元素（可点击）
+    swipe_up(driver)
     #下载更多字体
     wait_for_element(
         driver,
@@ -1010,7 +1109,7 @@ def test_barcode2(driver):
     wait_for_element(
         driver,
         By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[1]'
+        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[2]'
     ).click()
     #返回
     wait_for_element(
@@ -1230,6 +1329,8 @@ def test_symbol_frame(driver):
         By.XPATH,
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="0"]'
     ).click()
+    #单击屏幕画布区域关闭标识弹窗
+    perform_single_tap(driver,500,900)
 
     wait_for_element(
         driver,
@@ -1242,12 +1343,15 @@ def test_symbol_frame(driver):
         By.XPATH,
         '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[2]'
     ).click()
-
+    #单击屏幕画布区域关闭标识弹窗
+    perform_single_tap(driver,500,900)
+    '''   
+    #再次运行--确认是否需要删除
     wait_for_element(
         driver,
         By.ID,
         'com.fhit.app_iprinter:id/ivCancel').click()
-
+    '''
     wait_for_element(
         driver,
         By.XPATH,
@@ -1259,7 +1363,8 @@ def test_symbol_frame(driver):
         By.XPATH,
         '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="#"]'
     ).click()
-
+    #单击屏幕画布区域关闭标识弹窗
+    perform_single_tap(driver,500,900)
 
 def test_logo(driver):
     """测试LOGO功能
