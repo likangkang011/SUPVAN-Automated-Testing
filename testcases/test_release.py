@@ -688,8 +688,7 @@ def test_font(driver):
         By.ID,
         'com.fhit.app_iprinter:id/ivConfirm').click()
 
-def \
-        test_inverse(driver):
+def test_inverse(driver):
     """测试文本功能--反色功能
 
         :param driver: WebDriver实例
