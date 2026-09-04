@@ -67,8 +67,8 @@ def driver():
     # Appium 配置
     options = UiAutomator2Options()
     options.platform_name = "Android"
-    options.platform_version = device_config.get("platform_version")
-    options.device_name = device_config.get("device_name")
+    options.platform_version = device_config.get("platformVersion")
+    options.device_name = device_config.get("deviceName")
     options.udid = device_config.get("udid")
     options.app_package = "com.fhit.app_iprinter"
     options.app_activity = ".ui.home.activity.HomeActivity"
