@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
@@ -16,35 +21,27 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 点击新建标签按钮
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(*LOCATORS["create_new"]).click()
 time.sleep(1)
 
 # 点击图片
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="图片"]').click()
+driver.find_element(*LOCATORS["feature_图片"]).click()
 time.sleep(1)
 
 # 点击从相册中选择
-driver.find_element(
-    By.ID,
-    'com.fhit.app_iprinter:id/my_dialog_picture_photo_album_tv').click()
+driver.find_element(*LOCATORS["photo_album"]).click()
 time.sleep(1)
 
 # 选择相册里的第一张图片
-driver.find_element(
-    By.XPATH,
-    '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]').click()
+driver.find_element(*LOCATORS["photo_check_1"]).click()
 time.sleep(1)
 
 # 点击已完成
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/ps_tv_complete').click()
+driver.find_element(*LOCATORS["photo_complete"]).click()
 time.sleep(1)
 
 # 点击确定
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/menu_crop').click()
+driver.find_element(*LOCATORS["menu_crop"]).click()
 time.sleep(5)
 
 

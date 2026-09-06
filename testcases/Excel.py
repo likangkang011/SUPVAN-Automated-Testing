@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
@@ -17,40 +22,32 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 点击新建标签按钮
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(*LOCATORS["create_new"]).click()
 time.sleep(1)
 
 # 点击下一页
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv").click()
+driver.find_element(*LOCATORS["enter_right"]).click()
 time.sleep(1)
 
 
 # 点击Excel
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="Excel"]').click()
+driver.find_element(*LOCATORS["feature_Excel"]).click()
 time.sleep(1)
 
 # 打开Excel列表里的第一个文件
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/tvExcelName').click()
+driver.find_element(*LOCATORS["excel_filename"]).click()
 time.sleep(3)
 
 # 勾选需要导入的列
-driver.find_element(
-    By.XPATH,
-    '//androidx.recyclerview.widget.RecyclerView[@resource-id="com.fhit.app_iprinter:id/rvData"]/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.ImageView').click()
+driver.find_element(*LOCATORS["excel_row_1"]).click()
 time.sleep(1)
 
 # 点击生成
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/tvCreate').click()
+driver.find_element(*LOCATORS["create_btn"]).click()
 time.sleep(1)
 
 # 点击确定
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/ivAffirm').click()
+driver.find_element(*LOCATORS["affirm"]).click()
 time.sleep(5)
 
 

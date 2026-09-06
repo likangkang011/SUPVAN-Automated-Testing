@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 import unittest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -21,48 +26,29 @@ class Test_date(unittest.TestCase):
 # 使用 options 参数而非 desired_capabilities
     driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 # 进入编辑页
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+    driver.find_element(*LOCATORS["create_new"]).click()
     time.sleep(3)
 # 切换下一页功能(7次）
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
+    driver.find_element(*LOCATORS["enter_right"]).click()
 # 点击日期功能
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="日期"]').click()
+    driver.find_element(*LOCATORS["feature_日期"]).click()
 # 打开实时时间
-    driver.find_element(By.ID, "com.fhit.app_iprinter:id/sRealTime").click()
+    driver.find_element(*LOCATORS["date_realtime"]).click()
     time.sleep(3)
 # 首次点击打开实时时间需要点击'我知道了‘
-# driver.find_element(By.ID,"com.fhit.app_iprinter:id/tvReadTip").click()
+# driver.find_element(*LOCATORS["date_read_tip"]).click()
 # 打开星期
-    driver.find_element(By.ID, "com.fhit.app_iprinter:id/sWeek").click()
+    driver.find_element(*LOCATORS["date_week"]).click()
 # 打开添加关联时间
-    driver.find_element(
-        By.ID, "com.fhit.app_iprinter:id/sAddAssociation").click()
+    driver.find_element(*LOCATORS["date_add_association"]).click()
 # 点击确定
-    driver.find_element(By.ID, "com.fhit.app_iprinter:id/ivAffirm").click()
+    driver.find_element(*LOCATORS["affirm"]).click()
     time.sleep(3)
 # 关闭软件
     driver.quit()

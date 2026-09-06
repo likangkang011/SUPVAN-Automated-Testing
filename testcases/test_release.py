@@ -14,15 +14,16 @@ import time
 from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from appium.webdriver.common.appiumby import AppiumBy
+from locators import LOCATORS
 
 
 # ----------------统一管理变量----------------
 device_number1 = "T0013B2507037084"  # 第一台打印机编号（官方耗材）
-device_number2 = "T0013B2411226666"  # 第二台打印机编号(自定义耗材)
+device_number2 = "T0024B2024071849"  # 第二台打印机编号(自定义耗材)
 telephone_number = "17777786604"     # 登录手机号
-diy_width = "40"                     # 自定义耗材宽度
-diy_height = "20"                    # 自定义耗材高度
-diy_gap = "8"                        # 自定义耗材间隙
+diy_width = "50"                     # 自定义耗材宽度
+diy_height = "30"                    # 自定义耗材高度
+diy_gap = "3"                        # 自定义耗材间隙
 
 """
 # ----------------脱机体验机型列表----------------
@@ -77,6 +78,38 @@ def swipe_up(driver, duration=800):
     driver.swipe(start_x, start_y, end_x, end_y, duration)
 
 
+# ----------------元素左右滑动----------------
+def swipe_by_element(driver, by, locator, direction="left", duration=600):
+    """
+    从指定元素中心向左或向右滑动。
+
+    :param driver: Appium driver
+    :param by: 定位方式，例如 AppiumBy.XPATH
+    :param locator: 元素定位表达式
+    :param direction: "left" 或 "right"
+    :param duration: 滑动时长，单位毫秒
+    """
+    element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((by, locator))
+    )
+
+    # 元素中心作为滑动起点
+    start_x = element.location["x"] + element.size["width"] // 2
+    start_y = element.location["y"] + element.size["height"] // 2
+
+    # 滑到屏幕左右两边附近
+    screen_width = driver.get_window_size()["width"]
+
+    if direction.lower() == "left":
+        end_x = int(screen_width * 0.05)
+    elif direction.lower() == "right":
+        end_x = int(screen_width * 0.95)
+    else:
+        raise ValueError("direction 只能是 'left' 或 'right'")
+
+    driver.swipe(start_x, start_y, end_x, start_y, duration)
+
+
 # ----------------双击元素----------------
 def double_click(element, delay=0.1):
     """模拟双击操作
@@ -90,9 +123,8 @@ def double_click(element, delay=0.1):
     WebDriverWait(element._parent, delay).until(lambda d: True)
     element.click()
 
+
 # ----------------双击坐标----------------
-
-
 def perform_double_tap(driver, x: int, y: int,
                        tap_duration: float = 0.1, interval: float = 0.1):
     """
@@ -316,110 +348,40 @@ def test_add_all_function(driver):
 #        'com.fhit.app_iprinter:id/ivActivityOfflineExperienceBack').click()
 
     # 点击新建标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCreateNew').click()
+    wait_for_element(driver, *LOCATORS["create_new"]).click()
 
-    # 点击向右切换两次
-    for _ in range(2):
-        # 等待元素可点击
-        wait_clickable(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv'
-        ).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["kata_excel"],
+        direction="left"
+    )
 
     # 点击更多
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="更多"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_more"]).click()
 
     # 添加编辑功能到功能栏
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="标识"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_标识"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="边框"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_边框"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="符号"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_符号"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="logo"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_logo"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="序号"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_序号"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="线"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_涂鸦"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="涂鸦"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_反色"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="反色"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_端子端口"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="端子/端口"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_日期"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="日期"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_表格"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="表格"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["tab_识别"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="识别"]'
-    ).click()
-
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
-
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    )
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
     print('已添加所有功能到功能栏')
 
 
@@ -430,50 +392,20 @@ def test_loginin(driver):
     :return: None
     """
     # 返回首页
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["back_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[3]'
-    )
+    wait_for_element(driver, *LOCATORS["iv_icon_3"])
 
     # 去登录
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[3]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["iv_icon_3"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/rlPersonalInformationEnter').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/activity_login_phone_et').send_keys(telephone_number)
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/activity_login_verify_code_et').send_keys('8888')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/activity_login_agree_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/activity_login_confirm_btn').click()
+    wait_for_element(driver, *LOCATORS["personal_info_enter"]).click()
+    wait_for_element(driver, *LOCATORS["login_phone"]).send_keys(telephone_number)
+    wait_for_element(driver, *LOCATORS["login_code"]).send_keys('8888')
+    wait_for_element(driver, *LOCATORS["login_agree"]).click()
+    wait_for_element(driver, *LOCATORS["login_confirm_btn"]).click()
     # 返回首页
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="首页"]').click()
+    wait_for_element(driver, *LOCATORS["home_tab"]).click()
     print('登录成功')
 
 def test_connect_devices(driver):
@@ -484,15 +416,9 @@ def test_connect_devices(driver):
     """
     # 点击去连接
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[1]').click()
+    wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvGoConnect').click()
+    wait_for_element(driver, *LOCATORS["go_connect"]).click()
 
     wait_for_element(
         driver,
@@ -507,61 +433,23 @@ def test_text1(driver):
     :return: None
     """
     # 点击新建标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCreateNew'
-        ).click()
+    wait_for_element(driver, *LOCATORS["create_new"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-       'com.fhit.app_iprinter:id/ivFirstConnectionClose'
-    ).click()
+    wait_for_element(driver, *LOCATORS["first_connection_close"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="复制"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["copy_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="旋转"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["rotate_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="对齐"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["align_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivHorizontalLeft').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivVerticalTop').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["align_h_left"]).click()
+    wait_for_element(driver, *LOCATORS["align_v_top"]).click()
+    wait_for_element(driver, *LOCATORS["setting_align"]).click()
 
 
 def test_text2(driver):
@@ -570,78 +458,31 @@ def test_text2(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
     for _ in range(20):
-        wait_for_element(
-            driver,
-            By.XPATH,
-            '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="缩小"]'
-        ).click()
+        wait_for_element(driver, *LOCATORS["shrink_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
     for _ in range(20):
-        wait_for_element(
-            driver,
-            By.XPATH,
-            '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="放大"]'
-        ).click()
+        wait_for_element(driver, *LOCATORS["enlarge_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="对齐"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["align_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivHorizontalCenter').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivVerticalCenter').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["align_h_center"]).click()
+    wait_for_element(driver, *LOCATORS["align_v_center"]).click()
+    wait_for_element(driver, *LOCATORS["setting_align"]).click()
 
 
 def test_font(driver):
@@ -650,43 +491,19 @@ def test_font(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvFont').click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["font_btn"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["download_more_font"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[1]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_download_item_1"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_font_back').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["font_back"]).click()
+    wait_for_element(driver, *LOCATORS["view"]).click()
 
 def test_inverse(driver):
     """测试文本功能--反色功能
@@ -694,30 +511,14 @@ def test_inverse(driver):
         :param driver: WebDriver实例
         :return: None
     """
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-        ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
 
-    wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
-    wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
     for _ in range(5):
-        wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+        wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-            driver,
-            By.XPATH,
-            '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="反色"]').click()
+    wait_for_element(driver, *LOCATORS["feature_反色"]).click()
 
 def test_test3(driver):
     """测试文本功能--样式--自动换行
@@ -726,290 +527,114 @@ def test_test3(driver):
     :return: None
     """
     #新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     #回到功能栏首位置
     for _ in range(6):
-        wait_for_element(
-            driver,
-            By.XPATH,
-            '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_left_iv"]'
-        ).click()
+        wait_for_element(driver, *LOCATORS["enter_left"]).click()
     #点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-        ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     #点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     #开启自动换行
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sLayoutMode'
-    ).click()
+    wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
     #输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-        ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 def test_text4(driver):
     #调整字宽（放大两次）
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     # 点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     #输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
     #点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     #放大两次字宽
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivWordWidthAdd'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivWordWidthAdd'
-    ).click()
+    wait_for_element(driver, *LOCATORS["word_width_add"]).click()
+    wait_for_element(driver, *LOCATORS["word_width_add"]).click()
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-        ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
     #文字方向
 def test_text5(driver):
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     # 点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     # 输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('文字方向文字方向')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('文字方向文字方向')
     # 点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     #选择弧形文字方向
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivTextDirectionC'
-    ).click()
+    wait_for_element(driver, *LOCATORS["text_direction_c"]).click()
     # 点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 #------------测试字效-----------------------------
 def test_text6(driver):
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     # 点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     # 输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('添加不同字效')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('添加不同字效')
     # 点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     #页面上滑
     swipe_up(driver)
     #单击字效开关（倾斜）
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivEffectI'
-    ).click()
+    wait_for_element(driver, *LOCATORS["effect_italic"]).click()
     #下划线
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivEffectU'
-    ).click()
+    wait_for_element(driver, *LOCATORS["effect_underline"]).click()
     # 点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
 def test_text7(driver):
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv'
-    ).click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     #点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     #点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     #关闭自动换行
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sLayoutMode'
-    ).click()
+    wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
     #开启自动字号
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivFontSizeAuto'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_size_auto"]).click()
     #输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput'
-    ).send_keys('测试自动字号功能测试自动字号')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动字号功能测试自动字号')
     # 点击确定--关闭样式弹窗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 def test_text8(driver):
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv'
-    ).click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     # 点击文本
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["kata_text"]).click()
     # 点击样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeface'
-    ).click()
+    wait_for_element(driver, *LOCATORS["typeface"]).click()
     # 开启自动换行
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sLayoutMode'
-    ).click()
+    wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
     #页面上滑（有些机型该页面看不到行间距）
     swipe_up(driver)
     #输入内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput'
-    ).send_keys('测试文本设置字间距和行间距测试文本设置字间距和行间距')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试文本设置字间距和行间距测试文本设置字间距和行间距')
     #设置字间距为10
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etFontSpace'
-    ).send_keys('10')
+    wait_for_element(driver, *LOCATORS["font_space"]).send_keys('10')
     #设置行间距为-10
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etLineSpace'
-    ).clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etLineSpace'
-    ).send_keys('-10')
+    wait_for_element(driver, *LOCATORS["line_space"]).clear()
+    wait_for_element(driver, *LOCATORS["line_space"]).send_keys('-10')
     #关闭样式弹窗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 def test_repeat(driver):
     """测试文本功能--重复份数
 
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivRepeat').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_repetition_et').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_repetition_et').send_keys('3')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_repetition_iv_affirm').click()
+    wait_for_element(driver, *LOCATORS["repeat_btn"]).click()
+    wait_for_element(driver, *LOCATORS["repeat_input"]).clear()
+    wait_for_element(driver, *LOCATORS["repeat_input"]).send_keys('3')
+    wait_for_element(driver, *LOCATORS["repeat_affirm"]).click()
 
 #---------------一维码----------------------
 def test_barcode(driver):
@@ -1019,110 +644,40 @@ def test_barcode(driver):
     :return: None
     """
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["feature_一维码"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('6901236040287')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('6901236040287')
     #关闭字符开关
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sChars'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["barcode_chars_switch"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 def test_barcode2(driver):
     # 新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["feature_一维码"]).click()
     #选择条码类型--CODE-11
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivDown').click()
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/label" and @text="CODE-11"]'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('12345678912')
+    wait_for_element(driver, *LOCATORS["barcode_type_dropdown"]).click()
+    wait_for_element(driver, *LOCATORS["barcode_type_code11"]).click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('12345678912')
     #清空字符字号
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCharacter'
-    ).clear()
+    wait_for_element(driver, *LOCATORS["char_size_input"]).clear()
     #输入字符字号
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCharacter'
-    ).send_keys('10')
+    wait_for_element(driver, *LOCATORS["char_size_input"]).send_keys('10')
     #开启字符加粗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sCharsBold'
-    ).click()
+    wait_for_element(driver, *LOCATORS["chars_bold"]).click()
     #字符对齐方式选择居右对齐
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAlignRight'
-    ).click()
+    wait_for_element(driver, *LOCATORS["align_right"]).click()
     #点击字体
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvTypeFace'
-    ).click()
+    wait_for_element(driver, *LOCATORS["barcode_typeface"]).click()
     #页面上滑可看到下载更多字体的元素（可点击）
     swipe_up(driver)
     #下载更多字体
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'
-    ).click()
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[2]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["download_more_font"]).click()
+    wait_for_element(driver, *LOCATORS["font_download_item_2"]).click()
     #返回
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_font_back'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_back"]).click()
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 def test_qrcode(driver):
     """测试二维码功能
@@ -1130,25 +685,12 @@ def test_qrcode(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="二维码"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_二维码"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('硕方打印')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('硕方打印')
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 
 def test_photo(driver):
@@ -1157,36 +699,16 @@ def test_photo(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="图片"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_图片"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_picture_photo_album_tv').click()
+    wait_for_element(driver, *LOCATORS["photo_album"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["photo_check_1"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ps_tv_complete').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/menu_crop').click()
+    wait_for_element(driver, *LOCATORS["photo_complete"]).click()
+    wait_for_element(driver, *LOCATORS["menu_crop"]).click()
 
 def test_excel(driver):
     """测试Excel功能
@@ -1194,52 +716,21 @@ def test_excel(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="Excel"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_Excel"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@text="本地导入"]').click()
+    wait_for_element(driver, *LOCATORS["local_import"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="android:id/title" and @text="商品测试数据.xlsx"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["file_title"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//androidx.recyclerview.widget.RecyclerView[@resource-id="com.fhit.app_iprinter:id/rvData"]/android.widget.LinearLayout[1]/android.widget.LinearLayout/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["excel_row_1"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//androidx.recyclerview.widget.RecyclerView[@resource-id="com.fhit.app_iprinter:id/rvData"]/android.widget.LinearLayout[2]/android.widget.LinearLayout/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["excel_row_2"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvCreate').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["create_btn"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 def test_shape(driver):
     """测试形状功能
@@ -1247,27 +738,13 @@ def test_shape(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="形状"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_形状"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivShape"])[1]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["shape_item_1"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCancel').click()
+    wait_for_element(driver, *LOCATORS["cancel"]).click()
 
 
 def test_cable_label1(driver):
@@ -1276,116 +753,45 @@ def test_cable_label1(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="线缆标签"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_线缆标签"]).click()
 
     #输入内容--测试线缆
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etManualFirstFoldedContent').send_keys('测试线缆')
+    wait_for_element(driver, *LOCATORS["cable_first_content"]).send_keys('测试线缆')
     #选择第四个展示效果
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvAlignUpperLowerLeft'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["cable_align_upper_lower_left"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 def test_cable_label2(driver):
     #新增标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
     #选择线缆标签
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="线缆标签"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_线缆标签"]).click()
     #类型选择两折不同
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llBothDifferent'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_both_different"]).click()
     #页面上滑--展示出编辑区
     swipe_up(driver)
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etManualFirstFoldedContent'
-    ).send_keys('第一段内容')
+    wait_for_element(driver, *LOCATORS["cable_first_content"]).send_keys('第一段内容')
     #点击第二折
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvSecondFold'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_second_fold"]).click()
     #输入第二段内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etManualSecondFoldedContent'
-    ).send_keys('第二段内容')
+    wait_for_element(driver, *LOCATORS["cable_second_content"]).send_keys('第二段内容')
     #点击字体
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/clTypeFace'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_typeface"]).click()
     #切换字体--使用楷体
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="楷体"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_kaiti"]).click()
     #点击字效
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvEffect'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_effect"]).click()
     #取消加粗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llEffectB'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_effect_bold"]).click()
     #选择斜体
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llEffectI'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_effect_italic"]).click()
     #选择下划线
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivEffectU'
-    ).click()
+    wait_for_element(driver, *LOCATORS["effect_underline"]).click()
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm'
-    ).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 def test_symbol_frame(driver):
     """测试标识，边框，符号功能
@@ -1393,60 +799,27 @@ def test_symbol_frame(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="标识"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_标识"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="0"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["symbol_0"]).click()
     #单击屏幕画布区域关闭标识弹窗
     perform_single_tap(driver,500,900)
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="边框"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_边框"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[2]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["border_item_2"]).click()
     #单击屏幕画布区域关闭边框弹窗
     perform_single_tap(driver,500,900)
     '''   
     #再次运行--确认是否需要删除
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCancel').click()
+    wait_for_element(driver, *LOCATORS["cancel"]).click()
     '''
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="符号"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_符号"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="#"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["symbol_hash"]).click()
     #单击屏幕画布区域关闭符号弹窗
     perform_single_tap(driver,500,900)
 
@@ -1456,22 +829,11 @@ def test_logo(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="logo"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_logo"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivLogo"])[4]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["logo_item_4"]).click()
 
 
 def test_line(driver):
@@ -1480,21 +842,11 @@ def test_line(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
     for _ in range(3):
-        wait_for_element(
-            driver,
-            By.XPATH,
-            '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="线"]'
-        ).click()
+        wait_for_element(driver, *LOCATORS["feature_线"]).click()
 
 
 def test_sketch(driver):
@@ -1503,20 +855,10 @@ def test_sketch(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="涂鸦"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_涂鸦"]).click()
 
     # 定位坐标在涂鸦区域进行涂鸦
     driver.swipe(100, 1300, 700, 1300)
@@ -1524,30 +866,15 @@ def test_sketch(driver):
     driver.swipe(100, 1400, 700, 1400)
 
     #使用橡皮功能
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llEraser'
-    ).click()
+    wait_for_element(driver, *LOCATORS["eraser"]).click()
     #擦除部分已涂鸦内容
     driver.swipe(100, 1400, 700, 1400)
     #撤销上一次操作
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llRevocation'
-    ).click()
+    wait_for_element(driver, *LOCATORS["revocation"]).click()
     #取消撤销操作
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/llRecover'
-    ).click()
+    wait_for_element(driver, *LOCATORS["recover"]).click()
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
 
 def test_terminal_port(driver):
@@ -1556,130 +883,49 @@ def test_terminal_port(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="端子/端口"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_端子端口"]).click()
     #点击绘制边框
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/sBorder').click()
+    wait_for_element(driver, *LOCATORS["terminal_border"]).click()
     #清除端子宽度B的内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivClearSecond'
-    ).click()
+    wait_for_element(driver, *LOCATORS["terminal_clear_second"]).click()
     #输入端子宽度B的内容
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etWidth'
-    ).send_keys('8')
+    wait_for_element(driver, *LOCATORS["et_width"]).send_keys('8')
     #清除默认的端子格数
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etFrame'
-    ).clear()
+    wait_for_element(driver, *LOCATORS["terminal_frame"]).clear()
     #输入端子个数为4
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etFrame'
-    ).send_keys('4')
+    wait_for_element(driver, *LOCATORS["terminal_frame"]).send_keys('4')
     #选择分割线的样式
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivLineRectangle'
-    ).click()
+    wait_for_element(driver, *LOCATORS["terminal_line_rectangle"]).click()
     #点击内容板块
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@text="内容"]').click()
+    wait_for_element(driver, *LOCATORS["terminal_tab_content"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/adapter_terminal_block_content"])[1]'
-    ).send_keys('测试1')
+    wait_for_element(driver, *LOCATORS["terminal_content_1"]).send_keys('测试1')
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/adapter_terminal_block_content"])[2]'
-    ).send_keys('测试2')
+    wait_for_element(driver, *LOCATORS["terminal_content_2"]).send_keys('测试2')
     #点击样式
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@text="样式"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["terminal_tab_style"]).click()
     #设置字间距
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_font_space'
-    ).clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_font_space'
-    ).send_keys('3')
+    wait_for_element(driver, *LOCATORS["terminal_font_space"]).clear()
+    wait_for_element(driver, *LOCATORS["terminal_font_space"]).send_keys('3')
 
     #设置行间距
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_line_space'
-    ).clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_line_space'
-    ).send_keys('3')
+    wait_for_element(driver, *LOCATORS["terminal_line_space"]).clear()
+    wait_for_element(driver, *LOCATORS["terminal_line_space"]).send_keys('3')
     #选择字效（加粗、斜体，下划线）
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_effect_bold'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_effect_italic'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/fragment_terminal_block_style_effect_underline'
-    ).click()
+    wait_for_element(driver, *LOCATORS["terminal_effect_bold"]).click()
+    wait_for_element(driver, *LOCATORS["terminal_effect_italic"]).click()
+    wait_for_element(driver, *LOCATORS["terminal_effect_underline"]).click()
 
     #点击字体板块
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@text="字体"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["terminal_tab_font"]).click()
     #选择字体--站酷快乐体
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="站酷快乐体"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_zhanku"]).click()
 
 
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/dialog_terminal_block_confirm').click()
+    wait_for_element(driver, *LOCATORS["terminal_confirm"]).click()
 
 
 def test_date(driver):
@@ -1688,55 +934,21 @@ def test_date(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="日期"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_日期"]).click()
     #开启实时时间
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sRealTime').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvReadTip').click()
+    wait_for_element(driver, *LOCATORS["date_realtime"]).click()
+    wait_for_element(driver, *LOCATORS["date_read_tip"]).click()
     #开启星期开关
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sWeek'
-    ).click()
+    wait_for_element(driver, *LOCATORS["date_week"]).click()
     #点击前缀下拉框
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivTimePrefixPullDown'
-    ).click()
+    wait_for_element(driver, *LOCATORS["date_prefix_dropdown"]).click()
     #选择生产日期
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvFirstPrefix'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/sAddAssociation').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["date_first_prefix"]).click()
+    wait_for_element(driver, *LOCATORS["date_add_association"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 
 def test_table(driver):
@@ -1747,30 +959,15 @@ def test_table(driver):
     size = driver.get_window_size()
     width = size["width"]
     height = size["height"]
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_add_segment_iv').click()
+    wait_for_element(driver, *LOCATORS["add_label"]).click()
 
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="表格"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_表格"]).click()
 
 
     perform_double_tap(driver, x=width * 0.33, y=height * 0.29)
-    wait_visible(
-        driver,
-        By.ID,
-        "com.fhit.app_iprinter:id/window_table_edit"
-    ).send_keys("表格1")
+    wait_visible(driver, *LOCATORS["table_edit"]).send_keys("表格1")
 
-    wait_clickable(
-        driver,
-        By.ID,
-        "com.fhit.app_iprinter:id/dialog_table_iv_affirm"
-    ).click()
+    wait_clickable(driver, *LOCATORS["table_affirm"]).click()
 
 
 def  test_prewiew(driver):
@@ -1783,11 +980,7 @@ def  test_prewiew(driver):
     width = size["width"]
     height = size["height"]
     # 测试预览功能
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_preview_tv'
-    ).click()
+    wait_for_element(driver, *LOCATORS["preview_btn"]).click()
 
     driver.swipe(
         width * 0.5,
@@ -1805,10 +998,7 @@ def  test_prewiew(driver):
         800
     )
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_interior_handle_iv').click()
+    wait_for_element(driver, *LOCATORS["interior_handle"]).click()
 
 
 def test_savetemplate1(driver):
@@ -1818,18 +1008,9 @@ def test_savetemplate1(driver):
     :return: None
     """
     # 保存模板
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_save_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etTemplateName').send_keys('文本，一维码模板')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["save_btn"]).click()
+    wait_for_element(driver, *LOCATORS["template_name_input"]).send_keys('文本，一维码模板')
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
 
 def test_savetemplate2(driver):
@@ -1840,116 +1021,44 @@ def test_savetemplate2(driver):
     """
     # 添加序号模板
     #返回
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["main_back_btn"]).click()
     #不保存
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvNotSave').click()
+    wait_for_element(driver, *LOCATORS["not_save"]).click()
     #创建新标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCreateNew').click()
+    wait_for_element(driver, *LOCATORS["create_new"]).click()
     #标签旋转
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCanvasRotation').click()
+    wait_for_element(driver, *LOCATORS["canvas_rotation"]).click()
     for _ in range(4):
-        wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+        wait_for_element(driver, *LOCATORS["enter_right"]).click()
     #选择序号
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="序号"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_序号"]).click()
 
     #点击样式下拉框
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//androidx.viewpager.widget.ViewPager[@resource-id="com.fhit.app_iprinter:id/cvpFrame"]/android.widget.FrameLayout/android.widget.LinearLayout/android.view.ViewGroup/android.widget.ImageView[1]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["sequence_style_dropdown"]).click()
     #选择其他样式
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="0-999"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["sequence_style_0999"]).click()
 
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_sequence_produce_et_prefix').send_keys('前缀')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_sequence_produce_et_suffix').send_keys('后缀')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_sequence_produce_et_start').send_keys('1')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_sequence_produce_et_end').send_keys('5')
+    wait_for_element(driver, *LOCATORS["seq_prefix"]).send_keys('前缀')
+    wait_for_element(driver, *LOCATORS["seq_suffix"]).send_keys('后缀')
+    wait_for_element(driver, *LOCATORS["seq_start"]).send_keys('1')
+    wait_for_element(driver, *LOCATORS["seq_end"]).send_keys('5')
     #设置间隔为2
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivClearInterval'
-    ).click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_dialog_sequence_et_interval'
-    ).send_keys('2')
+    wait_for_element(driver, *LOCATORS["seq_clear_interval"]).click()
+    wait_for_element(driver, *LOCATORS["seq_interval"]).send_keys('2')
     #点击字体
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/clTypeFace'
-    ).click()
+    wait_for_element(driver, *LOCATORS["cable_typeface"]).click()
     #使用其他字体
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="黑体"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["font_heiti"]).click()
     #点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
     # 保存模板
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/my_activity_main_lp_save_iv').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etTemplateName').send_keys('序号模板')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["save_btn"]).click()
+    wait_for_element(driver, *LOCATORS["template_name_input"]).send_keys('序号模板')
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
     # 返回
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["main_back_btn"]).click()
 
 
 def test_print_personal_template1(driver):
@@ -1959,43 +1068,21 @@ def test_print_personal_template1(driver):
     :return: None
     """
     # 点击我的保存
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvMySave').click()
+    wait_for_element(driver, *LOCATORS["my_save"]).click()
 
     # 点击第一个已保存的模板
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tv_template_name" and @text="序号模板"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["template_序号"]).click()
 
     # 点击打印
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[3]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["iv_icon_3"]).click()
 
     # 点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
-    wait_disappear(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/btCancel'
-    )
+    wait_disappear(driver, *LOCATORS["print_cancel"])
 
     # 点击模板
-    wait_clickable(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[4]'
-    ).click()
+    wait_clickable(driver, *LOCATORS["iv_icon_4"]).click()
 
 
 def test_print_personal_template2(driver):
@@ -2005,42 +1092,19 @@ def test_print_personal_template2(driver):
     :return: None
     """
     # 切换成第二个模板
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tv_template_name" and @text="文本，一维码模板"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["template_文本一维码"]).click()
 
     # 点击打印
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[3]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["iv_icon_3"]).click()
 
-    wait_disappear(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/btCancel'
-    )
+    wait_disappear(driver, *LOCATORS["print_cancel"])
 
-    wait_clickable(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivRangeAdd'
-    ).click()
+    wait_clickable(driver, *LOCATORS["range_add"]).click()
 
     # 设置excel打印范围
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
-    wait_disappear(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/btCancel'
-    )
+    wait_disappear(driver, *LOCATORS["print_cancel"])
 
 
 def test_print_system_template(driver):
@@ -2051,37 +1115,19 @@ def test_print_system_template(driver):
     """
     # 打印系统模板
     # 点击模板
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="模板"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["template_tab"]).click()
 
     # 点击系统模板
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvSystemTemplate').click()
+    wait_for_element(driver, *LOCATORS["system_template"]).click()
 
     # 任选一个系统模板
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/mIvTemplateFileItem"])[1]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["template_file_item_1"]).click()
 
     # 点击打印
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[3]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["iv_icon_3"]).click()
 
     # 点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
 
 def test_print_setting(driver):
@@ -2094,17 +1140,10 @@ def test_print_setting(driver):
     width = size["width"]
     height = size["height"]
     # 点击返回
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'
-    ).click()
+    wait_for_element(driver, *LOCATORS["main_back_btn"]).click()
 
     # 点击不保存
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvNotSave').click()
+    wait_for_element(driver, *LOCATORS["not_save"]).click()
 
     size = driver.get_window_size()
     width = size["width"]
@@ -2118,19 +1157,10 @@ def test_print_setting(driver):
         height * 0.9)
 
     # 断开机器
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvGoConnect"]').click()
+    wait_for_element(driver, *LOCATORS["go_connect"]).click()
     # 点击去连接
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivIcon"])[1]').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvGoConnect').click()
+    wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
+    wait_for_element(driver, *LOCATORS["go_connect"]).click()
     # 连接另一台机器
     wait_for_element(
         driver,
@@ -2146,17 +1176,10 @@ def test_DIY(driver):
     :return: None
     """
     # 点击新建标签
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCreateNew').click()
+    wait_for_element(driver, *LOCATORS["create_new"]).click()
 
     # 点击耗材
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="耗材"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["consumable_tab"]).click()
     size = driver.get_window_size()
     width = size["width"]
     height = size["height"]
@@ -2169,203 +1192,93 @@ def test_DIY(driver):
         height * 0.5)
 
     # 选中自定义耗材
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/mTvGroupName" and @text="自定义耗材"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["consumable_custom_group"]).click()
 
     # 点击新增自定义耗材
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/rlCustomConsumablesAdd').click()
+    wait_for_element(driver, *LOCATORS["consumable_add"]).click()
 
     # 设置耗材的宽高
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etConsumableName').send_keys(
+    wait_for_element(driver, *LOCATORS["consumable_name"]).send_keys(
         "自定义耗材" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/etWidth').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHeight').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etDieCuttingInterval').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etWidth').send_keys(diy_width)
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHeight').send_keys(diy_height)
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etDieCuttingInterval').send_keys(diy_gap)
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivDeletePicture').click()
+    wait_for_element(driver, *LOCATORS["et_width"]).clear()
+    wait_for_element(driver, *LOCATORS["et_height"]).clear()
+    wait_for_element(driver, *LOCATORS["consumable_gap"]).clear()
+    wait_for_element(driver, *LOCATORS["et_width"]).send_keys(diy_width)
+    wait_for_element(driver, *LOCATORS["et_height"]).send_keys(diy_height)
+    wait_for_element(driver, *LOCATORS["consumable_gap"]).send_keys(diy_gap)
+    wait_for_element(driver, *LOCATORS["consumable_delete_picture"]).click()
 
     # 点击保存
-    wait_for_element(driver, By.ID, 'com.fhit.app_iprinter:id/tvSave').click()
+    wait_for_element(driver, *LOCATORS["consumable_save"]).click()
     time.sleep(3)
     print('已保存自定义耗材')
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/mIvTemplateFileItem"])[1]').click()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivAffirm').click()
+    wait_for_element(driver, *LOCATORS["template_file_item_1"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
     for _ in range(3):
-        wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv').click()
+        wait_for_element(driver, *LOCATORS["enter_right"]).click()
 
     # 点击添加一个边框
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="边框"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["feature_边框"]).click()
 
     # 添加一个边框
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[2]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["border_item_2"]).click()
 
     # 关闭边框弹窗
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivCancel').click()
+    wait_for_element(driver, *LOCATORS["cancel"]).click()
 
     # 添加文本
     # 双击编辑区进行编辑
     double_click(
-        wait_for_element(
-            driver,
-            By.ID,
-            'com.fhit.app_iprinter:id/my_activity_main_lp_paint_view').click()
+        wait_for_element(driver, *LOCATORS["paint_view"]).click()
     )
     # 输入文本
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etInput').send_keys('测试123')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
 
     # 点击确定
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivConfirm').click()
+    wait_for_element(driver, *LOCATORS["confirm"]).click()
 
     # 点击打印
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="打印"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["print_tab"]).click()
 
     # 设置打印份数
     # 清空输入框
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCopies').clear()
+    wait_for_element(driver, *LOCATORS["copies_input"]).clear()
 
     # 设置打印份数为2
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCopies').send_keys('2')
+    wait_for_element(driver, *LOCATORS["copies_input"]).send_keys('2')
 
     # 水平，垂直偏移为-16
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHShift').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHShift').send_keys('-16')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etVShift').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etVShift').send_keys('-16')
+    wait_for_element(driver, *LOCATORS["h_shift"]).clear()
+    wait_for_element(driver, *LOCATORS["h_shift"]).send_keys('-16')
+    wait_for_element(driver, *LOCATORS["v_shift"]).clear()
+    wait_for_element(driver, *LOCATORS["v_shift"]).send_keys('-16')
 
     # 点击确定，开始进行打印
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
     # 点击打印
-    wait_for_element(
-        driver,
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="打印"]'
-    ).click()
+    wait_for_element(driver, *LOCATORS["print_tab"]).click()
 
     # 设置打印份数
     # 清空输入框
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCopies').clear()
+    wait_for_element(driver, *LOCATORS["copies_input"]).clear()
 
     # 设置打印份数为3
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etCopies').send_keys('3')
+    wait_for_element(driver, *LOCATORS["copies_input"]).send_keys('3')
 
     # 打印当前页
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivRangeAdd').click()
+    wait_for_element(driver, *LOCATORS["range_add"]).click()
 
     # 设置打印浓度为9
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etDensity').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etDensity').send_keys('9')
+    wait_for_element(driver, *LOCATORS["density"]).clear()
+    wait_for_element(driver, *LOCATORS["density"]).send_keys('9')
 
     # 水平，垂直偏移为16
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHShift').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etHShift').send_keys('16')
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etVShift').clear()
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/etVShift').send_keys('16')
+    wait_for_element(driver, *LOCATORS["h_shift"]).clear()
+    wait_for_element(driver, *LOCATORS["h_shift"]).send_keys('16')
+    wait_for_element(driver, *LOCATORS["v_shift"]).clear()
+    wait_for_element(driver, *LOCATORS["v_shift"]).send_keys('16')
 
 
     # 打印设置页面上滑
@@ -2376,19 +1289,9 @@ def test_DIY(driver):
         height * 0.4)
 
     # 切换翻转方式为水平翻转
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/ivFlipAdd').click()
+    wait_for_element(driver, *LOCATORS["flip_add"]).click()
 
     # 点击确定开始打印
-    wait_for_element(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/tvConfirm').click()
+    wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
 
-    wait_disappear(
-        driver,
-        By.ID,
-        'com.fhit.app_iprinter:id/btCancel'
-    )
+    wait_disappear(driver, *LOCATORS["print_cancel"])
