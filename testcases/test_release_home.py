@@ -14,6 +14,12 @@ from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from appium.webdriver.common.appiumby import AppiumBy
 from locators import LOCATORS
+from utils.element_helper import (
+    wait_for_element,
+    wait_clickable,
+    wait_visible,
+    wait_disappear,
+)
 
 
 # ----------------统一管理变量----------------
@@ -156,60 +162,9 @@ def perform_double_tap(driver, x: int, y: int,
 
 
 # ----------------显示等待----------------
-def wait_for_element(driver, by, locator, timeout=10):
-    """显示等待元素可见
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认10s
-    :return: 可见的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.visibility_of_element_located((by, locator))
-    )
-
-
-def wait_clickable(driver, by, locator, timeout=20):
-    """等待元素可点击
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认20s
-    :return: 可点击的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.element_to_be_clickable((by, locator))
-    )
-
-
-def wait_visible(driver, by, locator, timeout=20):
-    """等待元素可见
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认20s
-    :return: 可见的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.visibility_of_element_located((by, locator))
-    )
-
-
-def wait_disappear(driver, by, locator, timeout=30):
-    """等待元素消失（不可见/不存在）
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间,默认30s
-    :return: 布尔值，表示元素是否消失
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.invisibility_of_element_located((by, locator))
-    )
+# 已统一迁移到 utils/element_helper.py（文件顶部导入）。
+# 定位失败时会立即抛错并点名具体元素，同时落盘截图 + 页面源码。
+# 原本地实现（wait_for_element / wait_clickable / wait_visible / wait_disappear）已删除。
 
 # ----------------测试用例----------------
 
@@ -548,7 +503,7 @@ def test_print(driver):
     # wait_for_element(driver,By.ID,'com.fhit.app_iprinter:id/etExcelLarge').clear()
     # wait_for_element(driver,By.ID,'com.fhit.app_iprinter:id/etExcelLarge').send_keys('3')
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
-    wait_disappear(driver, *LOCATORS["print_cancel"])
+    wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
 
 
 def test_change_machine(driver):
@@ -643,7 +598,7 @@ def test_print_settings(driver):
     wait_for_element(driver, *LOCATORS["range_add"]).click()
     # 打印
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
-    wait_disappear(driver, *LOCATORS["print_cancel"])
+    wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
 
 
 def test_multiple_print(driver):
@@ -716,7 +671,7 @@ def test_excel_import(driver):
     # 打印
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
-    wait_disappear(driver, *LOCATORS["print_cancel"])
+    wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
 
 
 def test_scan_barcode(driver):
@@ -742,7 +697,7 @@ def test_scan_barcode(driver):
     # 打印
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
-    wait_disappear(driver, *LOCATORS["print_cancel"])
+    wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
 
 
 def test_create_data(driver):
@@ -776,4 +731,4 @@ def test_create_data(driver):
     # 打印
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
-    wait_disappear(driver, *LOCATORS["print_cancel"])
+    wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)

@@ -15,6 +15,12 @@ from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from appium.webdriver.common.appiumby import AppiumBy
 from locators import LOCATORS
+from utils.element_helper import (
+    wait_for_element,
+    wait_clickable,
+    wait_visible,
+    wait_disappear,
+)
 
 
 # ----------------统一管理变量----------------
@@ -197,60 +203,10 @@ def perform_single_tap(driver, x: int, y: int, tap_duration: float = 0.1):
 
 
 # ----------------显示等待----------------
-def wait_for_element(driver, by, locator, timeout=10):
-    """显示等待元素可见
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认10s
-    :return: 可见的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.visibility_of_element_located((by, locator))
-    )
-
-
-def wait_clickable(driver, by, locator, timeout=20):
-    """等待元素可点击
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认20s
-    :return: 可点击的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.element_to_be_clickable((by, locator))
-    )
-
-
-def wait_visible(driver, by, locator, timeout=20):
-    """等待元素可见
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认20s
-    :return: 可见的元素
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.visibility_of_element_located((by, locator))
-    )
-
-
-def wait_disappear(driver, by, locator, timeout=20):
-    """等待元素消失（不可见/不存在）
-
-    :param driver: WebDriver实例
-    :param by: 定位方式
-    :param locator: 定位器
-    :param timeout: 超时时间，默认20s
-    :return: 布尔值，表示元素是否消失
-    """
-    return WebDriverWait(driver, timeout).until(
-        EC.invisibility_of_element_located((by, locator))
-    )
+# 已统一迁移到 utils/element_helper.py（文件顶部导入）。
+# 改动点：定位失败时会立即抛错，并在日志中直接点名是哪个 key 定位失败，
+#         同时落盘截图 + 页面源码到 logs/failure_artifacts/。
+# 原本地实现（wait_for_element / wait_clickable / wait_visible / wait_disappear）已删除。
 
 
 # ----------------测试用例----------------
@@ -541,6 +497,7 @@ def test_test3(driver):
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
     #点击确定
     wait_for_element(driver, *LOCATORS["confirm"]).click()
+
 def test_text4(driver):
     #调整字宽（放大两次）
     # 新增标签
@@ -625,6 +582,8 @@ def test_text8(driver):
     wait_for_element(driver, *LOCATORS["line_space"]).send_keys('-10')
     #关闭样式弹窗
     wait_for_element(driver, *LOCATORS["confirm"]).click()
+
+
 def test_repeat(driver):
     """测试文本功能--重复份数
 
