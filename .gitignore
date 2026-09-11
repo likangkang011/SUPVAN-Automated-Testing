@@ -7,3 +7,14 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# 忽略测试运行产物（截图 / 日志 / 失败现场 / HTML 报告 / 参数改写备份）
+logs/*.log
+logs/*.png
+logs/screenshots/
+logs/failure_artifacts/
+logs/param_backups/
+reports/*.html
+
+# 忽略本地工作数据
+.workbuddy/
