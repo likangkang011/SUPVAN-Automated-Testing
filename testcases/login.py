@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
@@ -15,31 +20,21 @@ options.no_reset = True
 # 使用 options 参数而非 desired_capabilities
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 # 进入主页，点击我的
-driver.find_element(By.ID, "com.fhit.app_iprinter:id/htwiHomeMine").click()
+driver.find_element(*LOCATORS["home_mine"]).click()
 # 点击头像
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/rlPersonalInformationEnter").click()
+driver.find_element(*LOCATORS["personal_info_enter"]).click()
 time.sleep(1)
 # 输入手机号
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/activity_login_phone_et").send_keys("19711916427")
+driver.find_element(*LOCATORS["login_phone"]).send_keys("19711916427")
 # 输入万能验证码8888
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/activity_login_verify_code_et").send_keys("8888")
+driver.find_element(*LOCATORS["login_code"]).send_keys("8888")
 # 勾选同意隐私政策
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/activity_login_agree_iv").click()
+driver.find_element(*LOCATORS["login_agree"]).click()
 # 点击登录
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/activity_login_confirm_btn").click()
+driver.find_element(*LOCATORS["login_confirm_btn"]).click()
 time.sleep(3)
 
-# driver.find_element(By.ID, 'com.fhit.app_iprinter:id/ivConfirm').click()
+# driver.find_element(*LOCATORS["confirm"]).click()
 # time.sleep(5)
 print("已完成")
 

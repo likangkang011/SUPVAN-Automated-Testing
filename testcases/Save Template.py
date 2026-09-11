@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
@@ -17,25 +22,20 @@ options.no_reset = True
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 
 # 点击新建标签按钮
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(*LOCATORS["create_new"]).click()
 time.sleep(1)
 
 # 点击保存
-driver.find_element(
-    By.ID,
-    'com.fhit.app_iprinter:id/my_activity_main_lp_save_iv').click()
+driver.find_element(*LOCATORS["save_btn"]).click()
 time.sleep(1)
 
 # 输入模板名称
-driver.find_element(
-    By.ID, 'com.fhit.app_iprinter:id/etTemplateName').send_keys(
+driver.find_element(*LOCATORS["template_name_input"]).send_keys(
         "测试" + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 time.sleep(1)
 
 # 点击保存
-driver.find_element(By.ID, 'com.fhit.app_iprinter:id/tvConfirm').click()
+driver.find_element(*LOCATORS["tv_confirm"]).click()
 time.sleep(5)
 
 print("已完成")

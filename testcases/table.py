@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver import Keys
@@ -15,36 +20,18 @@ options.no_reset = True
 # 使用 options 参数而非 desired_capabilities
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
 # 进入编辑页
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(*LOCATORS["create_new"]).click()
 # 切换下一页功能(7次）
 time.sleep(1)
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
 # 点击表格
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="表格"]').click()
+driver.find_element(*LOCATORS["feature_表格"]).click()
 # 打印当前页面尺寸
 size = driver.get_window_size()
 print(size)
@@ -59,29 +46,19 @@ driver.swipe(
     screen_width * 0.34,
     screen_height * 0.29)
 time.sleep(2)
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]').click()
+driver.find_element(*LOCATORS["table_attribute"]).click()
 time.sleep(2)
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/window_table_edit").send_keys("表格1")
+driver.find_element(*LOCATORS["table_edit"]).send_keys("表格1")
 # 输入表格二的信息
 driver.swipe(
     screen_width * 0.67,
     screen_height * 0.29,
     screen_width * 0.66,
     screen_height * 0.29)
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]').click()
+driver.find_element(*LOCATORS["table_attribute"]).click()
 time.sleep(2)
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/window_table_edit").send_keys("表格2")
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/dialog_table_iv_affirm").click()
+driver.find_element(*LOCATORS["table_edit"]).send_keys("表格2")
+driver.find_element(*LOCATORS["table_affirm"]).click()
 print("已完成")
 time.sleep(2)
 driver.terminate_app('com.fhit.app_iprinter')

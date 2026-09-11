@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 import unittest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -18,25 +23,19 @@ class Test_223(unittest.TestCase):
 
     driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
     # 进入标签页
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+    driver.find_element(*LOCATORS["create_new"]).click()
     time.sleep(3)
 
     # 获取并且打印当前页面
     current_context = driver.current_context
     print(current_context)
     # 点击一维码
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]').click()
+    driver.find_element(*LOCATORS["feature_一维码"]).click()
     time.sleep(1)
     # 定位输入框并输入
-    driver.find_element(
-        By.XPATH,
-        '//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etInput"]').send_keys("6923569204532")
+    driver.find_element(*LOCATORS["input_edit"]).send_keys("6923569204532")
     # 关闭一维码编辑页
-    driver.find_element(By.ID, "com.fhit.app_iprinter:id/ivAffirm").click()
+    driver.find_element(*LOCATORS["affirm"]).click()
     time.sleep(2)
 
     driver.quit()

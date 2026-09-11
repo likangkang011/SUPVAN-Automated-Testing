@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from locators import LOCATORS
+
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from selenium.webdriver.common.by import By
@@ -14,28 +19,16 @@ options.no_reset = True
 
 # 使用 options 参数而非 desired_capabilities
 driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivCreateNew"]').click()
+driver.find_element(*LOCATORS["create_new"]).click()
 time.sleep(1)
 # 切换下一页功能(3次）
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
-driver.find_element(
-    By.XPATH,
-    '//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"]').click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
+driver.find_element(*LOCATORS["enter_right"]).click()
 # 点击符号
-driver.find_element(
-    By.XPATH,
-    '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="符号"]').click()
+driver.find_element(*LOCATORS["feature_符号"]).click()
 time.sleep(1)
 # 添加第一个符号
-driver.find_element(
-    By.ID,
-    "com.fhit.app_iprinter:id/my_item_symbol_tv").click()
+driver.find_element(*LOCATORS["symbol_first"]).click()
 time.sleep(1)
 driver.quit()
