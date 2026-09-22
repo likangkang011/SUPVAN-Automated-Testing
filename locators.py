@@ -44,7 +44,6 @@ LOCATORS = {
     "kata_text": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="文本"]'),      # 文本
     "kata_excel": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="Excel"]'),   # Excel
     "kata_more": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="更多"]'),     # 更多
-
     "feature_反色": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="反色"]'),
     "feature_一维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]'),
     "feature_二维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="二维码"]'),
@@ -252,7 +251,8 @@ LOCATORS = {
     "enter_new_version": (AppiumBy.XPATH, '//android.widget.TextView[@text="进入新版"]'),  # 进入新版
     "my_tab": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="我的"]'),  # 我的tab（新版）
     "login_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/btnLogin"),                     # 去登录
-    "connect_state": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvConnectState"),           # 连接状态/切换机器
+    "connect_state": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvDeviceName"),             # 连接状态/切换机器
+    "connect_down": (AppiumBy.XPATH, '//android.widget.TextView[@text="确定"]'),       # 断开连接按钮
     "goto_edit": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvGotoEdit"),                   # 去编辑
     "first_connection": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivFirstConnection"),     # 新建标签引导关闭
     "new_label": (AppiumBy.ID, "com.fhit.app_iprinter:id/iv_new_label"),                 # 新增标签（新版）
@@ -265,6 +265,8 @@ LOCATORS = {
     "material_info_icon": (AppiumBy.ID, "com.fhit.app_iprinter:id/tv_material_info_icon"),  # 耗材信息图标
 
     # ================= 家用风新版UI：功能区入口（tvKataMyObjectSetting） =================
+
+    "home_text": (AppiumBy.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="文本"]'),
     "kata_barcode": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="条形码"]'),
     "kata_qrcode": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="二维码"]'),
     "kata_excel_import": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="Excel导入"]'),
@@ -290,7 +292,7 @@ LOCATORS = {
     "next_page": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivNextPage"),                   # 下一页
 
     # ================= 家用风新版UI：符号/边框/形状/涂鸦 =================
-    "symbol_exclamation": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="!"]'),  # 符号!
+    "symbol_exclamation": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivSvgSymbol"])[1]'),  # 符号!
     "label_produce_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogLabelProduce"),  # 收起功能区域
     "border_item_3": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[3]'),  # 边框3
     "wire_frame_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogWireFrame"),  # 收起边框弹窗

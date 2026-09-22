@@ -23,13 +23,13 @@ from utils.element_helper import (
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0109A2024041502"  # 第一台打印机编号（官方耗材）
-device_number2 = "T0171A2504150001"  # 第二台打印机编号(自定义耗材)
-device_number3 = "T0109A2024041502"  # 第三台打印机编号（商超耗材）
-telephone_number = "17777786604"     # 登录手机号
-diy_width = "30"                     # 自定义耗材宽度
-diy_height = "20"                    # 自定义耗材高度
-diy_gap = "8"                        # 自定义耗材间隙
+device_number1 = "MP0004A2512030235"  # 第一台打印机编号（官方耗材）
+device_number2 = "T0186A2510246011"   # 第二台打印机编号(自定义耗材)
+device_number3 = "T0109A2024041502"   # 第三台打印机编号（商超耗材）
+telephone_number = "17777786604"      # 登录手机号
+diy_width = "30"                      # 自定义耗材宽度
+diy_height = "20"                     # 自定义耗材高度
+diy_gap = "8"                         # 自定义耗材间隙
 
 # # ----------------脱机体验机型列表----------------
 # EXPECTED_MODELS = {
@@ -212,8 +212,10 @@ def test_add_text(driver):
     wait_for_element(driver, *LOCATORS["goto_edit"]).click()
     # 关闭新建标签引导图
     wait_for_element(driver, *LOCATORS["first_connection"]).click()
+    #打开功能区
+    wait_for_element(driver, *LOCATORS["more_fun"]).click()
     # 使用文本功能
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["home_text"]).click()
     # 输入内容
     wait_for_element(driver, *LOCATORS["edit_text_class"]).send_keys('添加文本')
     # 点击复制
@@ -265,7 +267,7 @@ def test_add_qrcode(driver):
     # 点击确定
     wait_for_element(driver, *LOCATORS["affirm"]).click()
 
-
+'''       不同手机系统导入Excel的界面不一致--先隐藏
 def test_add_excel(driver):
     """Excel导入功能测试
 
@@ -278,7 +280,7 @@ def test_add_excel(driver):
     wait_for_element(driver, *LOCATORS["hide_preview"]).click()
     # 打开功能区
     wait_for_element(driver, *LOCATORS["more_fun"]).click()
-    # 导入二维码
+    # 导入EXCEL
     wait_for_element(driver, *LOCATORS["kata_excel_import"]).click()
     # 选择本地导入
     wait_for_element(driver, *LOCATORS["local_import"]).click()
@@ -290,7 +292,7 @@ def test_add_excel(driver):
     wait_for_element(driver, *LOCATORS["create_btn"]).click()
     # 确认生成
     wait_for_element(driver, *LOCATORS["sim_affirm"]).click()
-
+'''
 
 def test_add_symbol(driver):
     """添加符号功能测试
@@ -311,7 +313,7 @@ def test_add_symbol(driver):
     # 收起功能区域
     wait_for_element(driver, *LOCATORS["label_produce_close"]).click()
 
-
+''' 先注释掉：选择手机图片时手机系统不同，方式不同会报错（同Excel）
 def test_ai_photo_print(driver):
     """AI拍照打印功能测试
 
@@ -334,8 +336,9 @@ def test_ai_photo_print(driver):
     wait_for_element(driver, *LOCATORS["photo_complete"]).click()
     # 点击确定
     wait_for_element(driver, *LOCATORS["appcompat_linear_layout"]).click()
+'''
 
-    '''
+'''
 def test_template(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["new_label"]).click()
@@ -347,7 +350,7 @@ def test_template(driver):
     wait_for_element(driver,By.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="模板"]').click()
     #使用第一个系统模板
     wait_for_element(driver,By.XPATH,'(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tv_template_name"])[1]').click()
-    '''
+'''
 
 
 def test_add_shape(driver):
@@ -444,6 +447,7 @@ def test_add_table(driver):
     # 点击确定按钮
     wait_for_element(driver, *LOCATORS["table_affirm"]).click()
 
+'''
 
 def test_add_photo(driver):
     """添加图片功能测试
@@ -469,7 +473,8 @@ def test_add_photo(driver):
     wait_for_element(driver, *LOCATORS["photo_complete"]).click()
     # 点击确定
     wait_for_element(driver, *LOCATORS["appcompat_linear_layout"]).click()
-
+    
+'''
 
 def test_save_template(driver):
     """保存模板功能测试
@@ -518,7 +523,8 @@ def test_change_machine(driver):
     wait_for_element(driver, *LOCATORS["not_save"]).click()
     # 切换机器
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
-    wait_for_element(driver, *LOCATORS["confirm_text"]).click()
+    #确定断开连接
+    wait_for_element(driver, *LOCATORS["connect_down"]).click()
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
     # 连接新机器型号
     wait_for_element(
@@ -539,8 +545,8 @@ def test_new_template(driver):
     wait_for_element(driver, *LOCATORS["material_info_icon"]).click()
     # 自定义耗材
     wait_for_element(driver, *LOCATORS["go_custom_label"]).click()
-    wait_for_element(driver, *LOCATORS["input_width"]).send_keys('50')
-    wait_for_element(driver, *LOCATORS["input_height"]).send_keys('30')
+    wait_for_element(driver, *LOCATORS["input_width"]).send_keys('52')
+    wait_for_element(driver, *LOCATORS["input_height"]).send_keys('52')
     wait_for_element(driver, *LOCATORS["input_gap"]).send_keys('3')
     # 点击确定
     wait_for_element(driver, *LOCATORS["confirm_tv"]).click()

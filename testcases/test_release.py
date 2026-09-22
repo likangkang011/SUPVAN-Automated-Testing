@@ -307,7 +307,7 @@ def test_add_all_function(driver):
     wait_for_element(driver, *LOCATORS["create_new"]).click()
 
     # 左滑
-    swipe_by_element(driver, *LOCATORS["kata_excel"],
+    swipe_by_element(d+river, *LOCATORS["kata_excel"],
         direction="left"
     )
 
