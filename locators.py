@@ -283,6 +283,23 @@ LOCATORS = {
     "kata_scan_barcode": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="扫描商品条码"]'),
     "kata_my_goods": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="我的商品"]'),
 
+    # ====================家用风新版UI：文本样式（样式/字体/对齐）===========================
+
+    "text_style": (AppiumBy.ID,'com.fhit.app_iprinter:id/tv_style_setting'),                               #样式按钮
+    "text_italic": (AppiumBy.ID,'com.fhit.app_iprinter:id/ivKataMyFragmentStyleItalic'),                   #斜体字效
+    "text_strikethrough": (AppiumBy.ID,'com.fhit.app_iprinter:id/ivKataMyFragmentStyleStrikeThrough'),     #删除线字效
+    "text_underline": (AppiumBy.ID,'com.fhit.app_iprinter:id/ivKataMyFragmentStyleUnderLine'),             #下划线字效
+    "text_align_left":(AppiumBy.ID,'com.fhit.app_iprinter:id/rbKataMyFragmentAlignLeft'),                  #文本居左
+    "text_align_center": (AppiumBy.ID, 'com.fhit.app_iprinter:id/rbKataMyFragmentAlignCenter'),            #文本居中
+    "text_align_right": (AppiumBy.ID, 'com.fhit.app_iprinter:id/rbKataMyFragmentAlignRight'),              #文本居右
+    "text_auto_return": (AppiumBy.ID, 'com.fhit.app_iprinter:id/swAutoReturn'),                            #自动换行
+    "text_auto_size": (AppiumBy.ID, 'com.fhit.app_iprinter:id/cbFontSizeAuto'),                            #自动字号
+    "text_font_space_min": (AppiumBy.ID, 'com.fhit.app_iprinter:id/ivFontSpaceMin'),                       #字间距（减）
+    "text_font_space_max": (AppiumBy.ID, 'com.fhit.app_iprinter:id/ivFontSpaceMax'),                       #字间距（加）
+    "text_line_space_min": (AppiumBy.ID, 'com.fhit.app_iprinter:id/ivLineSpaceMin'),                       #行间距（减）
+    "text_line_space_max": (AppiumBy.ID, 'com.fhit.app_iprinter:id/ivLineSpaceMax'),                       #行间距（加）
+    #文本元素方向滑动只记住x/y的变化即可
+
     # ================= 家用风新版UI：Excel/导入 =================
     "sim_affirm": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivSimAffirm"),                 # 确认生成Excel
     "documentsui_icon_thumb_1": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.android.documentsui:id/icon_thumb"])[1]'),  # 文件选择器第1项
@@ -292,7 +309,7 @@ LOCATORS = {
     "next_page": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivNextPage"),                   # 下一页
 
     # ================= 家用风新版UI：符号/边框/形状/涂鸦 =================
-    "symbol_exclamation": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivSvgSymbol"])[1]'),  # 符号!
+    "symbol_exclamation": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="1"]'),  # 符号!
     "label_produce_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogLabelProduce"),  # 收起功能区域
     "border_item_3": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[3]'),  # 边框3
     "wire_frame_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogWireFrame"),  # 收起边框弹窗

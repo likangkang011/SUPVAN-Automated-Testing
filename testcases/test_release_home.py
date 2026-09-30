@@ -85,8 +85,6 @@ def swipe_up(driver, duration=800):
     driver.swipe(start_x, start_y, end_x, end_y, duration)
 
 # ----------------底部页面左滑----------------
-
-
 def swipe_left(driver):
     """底部页面左滑操作
 
@@ -102,6 +100,7 @@ def swipe_left(driver):
     end_x = width * 0.3
     end_y = height * 0.75
     driver.swipe(start_x, start_y, end_x, end_y)
+
 
 # ----------------双击元素----------------
 
@@ -218,6 +217,22 @@ def test_add_text(driver):
     wait_for_element(driver, *LOCATORS["home_text"]).click()
     # 输入内容
     wait_for_element(driver, *LOCATORS["edit_text_class"]).send_keys('添加文本')
+    #点击字体，更改字体样式
+    wait_for_element(driver, *LOCATORS["text_style"]).click()
+    #使用斜体功能
+    wait_for_element(driver, *LOCATORS["text_italic"]).click()
+    #使用删除线
+    wait_for_element(driver, *LOCATORS["text_strikethrough"]).click()
+    #使用下换线
+    wait_for_element(driver, *LOCATORS["text_underline"]).click()
+    #勾选自动换行
+    wait_for_element(driver, *LOCATORS["text_auto_return"]).click()
+    #清空文本框内容
+    wait_for_element(driver, *LOCATORS["edit_text_class"]).click()
+    #再次输入内容，验证自动换行效果成功实现
+    wait_for_element(driver, *LOCATORS["edit_text_class"]).send_keys('添加文本内容：增加测试内容！')
+    #底部功能区页面上滑，展示更多功能
+    driver.swipe(200, 1100, 200, 1500)
     # 点击复制
     wait_for_element(driver, *LOCATORS["copy_btn"]).click()
     # 旋转
@@ -613,17 +628,21 @@ def test_multiple_print(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    # 点击我的
-    wait_for_element(driver, *LOCATORS["my_tab"]).click()
-    # 进入新版
-    wait_for_element(driver, *LOCATORS["enter_new_version"]).click()
-    # 点击去连接
+    # 点击返回按钮
+    wait_for_element(driver, *LOCATORS["home_back"]).click()
+    # 确定不保存按钮
+    wait_for_element(driver, *LOCATORS["not_save"]).click()
+    # 切换机器
+    wait_for_element(driver, *LOCATORS["connect_state"]).click()
+    # 确定断开连接
+    wait_for_element(driver, *LOCATORS["connect_down"]).click()
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
     # 连接机器
     wait_for_element(
         driver,
         By.XPATH,
         f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]').click()
+
     # 点击去编辑
     wait_for_element(driver, *LOCATORS["goto_edit"]).click()
     # 新建标签
@@ -738,3 +757,4 @@ def test_create_data(driver):
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
     wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
+
