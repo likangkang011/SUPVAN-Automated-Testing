@@ -1,4 +1,5 @@
 import os
+import subprocess
 import pytest
 import datetime
 from appium import webdriver
@@ -8,6 +9,20 @@ from utils.logger import setup_logger, get_logger
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+
+# 🔴 国产 ROM（vivo / OPPO / 小米 / 华为）必查项
+# ---------------------------------------------------------------------------
+# 现象：Appium session 能建立，handle_privacy_agreement 能通过，
+#       但任何 find_element 命令都会 RemoteDisconnected / Connection aborted。
+# 根因：厂商定制的"后台耗电管理"把 UIAutomator2 Server 的 HTTP socket 掐掉了，
+#       进程还活着（ps 能看到），但端口不监听（/proc/net/tcp 里没有 6790/8200）。
+# 手机端修复（AOSP 无对应 API，无法脚本化，必须手动）：
+#   设置 → 电池 → 后台耗电管理 / 允许后台活动：
+#     ✅ io.appium.uiautomator2.server
+#     ✅ io.appium.uiautomator2.server.test
+#     ✅ Appium Settings
+#       三个全部设为「允许后台高耗电」或「无限制」。
+# ---------------------------------------------------------------------------
 
 # 📌 全局日志：控制台实时输出（配合 pytest.ini 的 log_cli）+ 落盘 logs/run.log
 setup_logger()
@@ -99,8 +114,35 @@ def handle_privacy_agreement(driver):
         logger.info("未检测到隐私协议弹窗: %s", e)
 
 
+def _preflight_check():
+    """启动前快速自检：三个 Appium 相关包是否都装了。
+
+    不会自动修复「允许后台高耗电」（AOSP 没开放接口），
+    但会在缺失时明确点名，减少换设备后的调试时间。
+    """
+    needed = [
+        "io.appium.settings",
+        "io.appium.uiautomator2.server",
+        "io.appium.uiautomator2.server.test",
+    ]
+    out = subprocess.run(
+        ["adb", "shell", "pm", "list", "packages"],
+        capture_output=True, text=True, timeout=15,
+    ).stdout
+
+    missing = [p for p in needed if p not in out]
+    if missing:
+        logger.warning("⚠️ 设备上缺失 Appium 依赖包：%s", missing)
+        logger.warning("   Appium 会在启动 session 时自动安装，但安装失败请检查网络")
+    else:
+        logger.info("✅ Appium 三个依赖包已就绪")
+
+
 @pytest.fixture(scope="session")
 def driver():
+
+    # 启动前快速自检
+    _preflight_check()
 
     # 自动检测设备
     device_config = DeviceDetector.select_device()
