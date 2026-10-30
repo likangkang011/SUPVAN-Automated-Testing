@@ -23,10 +23,10 @@ from utils.element_helper import (
 
 
 # ----------------统一管理变量----------------
-device_number1 = "MP0004A2512030235"  # 第一台打印机编号（官方耗材）
+device_number1 = "MP0004A2506283071"  # 第一台打印机编号（官方耗材）
 device_number2 = "T0186A2510246011"   # 第二台打印机编号(自定义耗材)
 device_number3 = "T0109A2024041502"   # 第三台打印机编号（商超耗材）
-telephone_number = "17777786604"      # 登录手机号
+telephone_number = "197111916427"      # 登录手机号
 diy_width = "30"                      # 自定义耗材宽度
 diy_height = "20"                     # 自定义耗材高度
 diy_gap = "8"                         # 自定义耗材间隙
@@ -210,7 +210,7 @@ def test_add_text(driver):
     # 点击去编辑
     wait_for_element(driver, *LOCATORS["goto_edit"]).click()
     # 关闭新建标签引导图
-    wait_for_element(driver, *LOCATORS["first_connection"]).click()
+    wait_for_element(driver, *LOCATORS["first_connection"]).click()   #暂时只能使用模切标签，否则引导页数会增加！！！！！
     #打开功能区
     wait_for_element(driver, *LOCATORS["more_fun"]).click()
     # 使用文本功能

@@ -309,7 +309,7 @@ LOCATORS = {
     "next_page": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivNextPage"),                   # 下一页
 
     # ================= 家用风新版UI：符号/边框/形状/涂鸦 =================
-    "symbol_exclamation": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="1"]'),  # 符号!
+    "symbol_exclamation": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivSvgSymbol"])[1]'),  # 符号!
     "label_produce_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogLabelProduce"),  # 收起功能区域
     "border_item_3": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[3]'),  # 边框3
     "wire_frame_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogWireFrame"),  # 收起边框弹窗
