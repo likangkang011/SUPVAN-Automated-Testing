@@ -263,6 +263,7 @@ LOCATORS = {
     "back": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivBack"),                            # 关闭时间弹窗
     "home_back": (AppiumBy.ID, "com.fhit.app_iprinter:id/iv_back"),                      # 返回
     "material_info_icon": (AppiumBy.ID, "com.fhit.app_iprinter:id/tv_material_info_icon"),  # 耗材信息图标
+    "quick_login_btn":(AppiumBy.XPATH,'//android.widget.TextView[@text="其他手机号登录"]'),#快捷登录页面使用手机号登录
 
     # ================= 家用风新版UI：功能区入口（tvKataMyObjectSetting） =================
 
