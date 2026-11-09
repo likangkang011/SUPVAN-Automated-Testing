@@ -42,9 +42,14 @@ def _read(path):
 
 
 def _by_name(node):
-    """取出 By 的名字：AppiumBy.ID -> 'ID'；字符串常量 'class name' 原样返回。"""
+    """取出 By 的名字：AppiumBy.ID -> 'ID'；字符串常量 'class name' 原样返回。
+
+    常量引用（如 locators.py 里的 ``COORDINATE``）返回常量名，便于体检里显示。
+    """
     if isinstance(node, ast.Attribute):
         return node.attr
+    if isinstance(node, ast.Name):
+        return node.id
     if isinstance(node, ast.Constant):
         return str(node.value)
     return None

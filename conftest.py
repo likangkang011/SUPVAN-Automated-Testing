@@ -29,22 +29,55 @@ setup_logger()
 logger = get_logger("conftest")
 
 
+def _resolve_arg_against_root(arg, project_root):
+    """把「以启动目录为基准找不到」的相对路径，改按项目根重新解析。
+
+    pytest 解析命令行里的相对路径时，基准是**启动目录（cwd）**，不是 rootdir。
+    所以在 testcases/ 里执行 `pytest testcases/test_release.py` 会直接报
+    `ERROR: file or directory not found: testcases/test_release.py`
+    —— 文件明明在，rootdir 也认对了，只是路径重复拼接了一层目录。
+
+    只在「相对 cwd 不存在、相对项目根存在」时改写，真正写错的路径仍照常报错。
+    支持 `文件::用例` 形式的 nodeid。
+    """
+    path_part, sep, node_part = arg.partition("::")
+    if not path_part or os.path.isabs(path_part) or os.path.exists(path_part):
+        return arg
+
+    candidate = os.path.join(project_root, path_part)
+    if not os.path.exists(candidate):
+        return arg
+
+    logger.info(
+        "相对路径 %s 不在启动目录下，已按项目根重新解析为 %s", path_part, candidate
+    )
+    return candidate + sep + node_part
+
+
 def _anchor_collect_args(config):
-    """把收集目标修正到项目根，避免「在子目录里跑 pytest → collected 0 items」。
+    """把收集目标修正到项目根，避免「在子目录里跑 pytest」踩坑。
 
     背景：pytest 只在「启动目录 == rootdir」时才应用 pytest.ini 的 testpaths
     （见 _pytest/config/__init__.py 的 _decide_args），在子目录下执行会静默退化成
     「从当前目录收集」，只在输出头部少一行 `testpaths: xxx`，极难排查。
 
     config.args_source 精确告诉我们目标是怎么来的：
-      - ARGS           用户显式指定了路径  -> 尊重，不干预
+      - ARGS           用户显式指定了路径  -> 基准是 cwd，需要逐个校验
       - TESTPATHS      testpaths 已生效      -> 正常，不干预
       - INVOCATION_DIR pytest 退化成「用启动目录」 -> 需要修正
     """
-    if getattr(getattr(config, "args_source", None), "name", None) != "INVOCATION_DIR":
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    source = getattr(getattr(config, "args_source", None), "name", None)
+
+    if source == "ARGS":
+        resolved = [_resolve_arg_against_root(a, project_root) for a in config.args]
+        if resolved != list(config.args):
+            config.args = resolved
         return
 
-    project_root = os.path.dirname(os.path.abspath(__file__))
+    if source != "INVOCATION_DIR":
+        return
+
     testpaths = config.getini("testpaths") or ["."]
     targets = [
         os.path.join(project_root, tp)

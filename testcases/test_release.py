@@ -20,12 +20,19 @@ from utils.element_helper import (
     wait_clickable,
     wait_visible,
     wait_disappear,
+    click_if_present,
+    tap_ratio,
+    scroll_into_view,
+    is_in_viewport,
+    dismiss_first_connect_guide,
+    find_with_swipe,
+    click_with_swipe,
 )
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0013B2507037084"  # 第一台打印机编号（官方耗材）
-device_number2 = "T0024B2024071849"  # 第二台打印机编号(自定义耗材)
+device_number1 = "T0021B2312264398"  # 第一台打印机编号（官方耗材）
+device_number2 = "T0013B2411226666"  # 第二台打印机编号(自定义耗材)
 telephone_number = "17777786604"     # 登录手机号
 diy_width = "50"                     # 自定义耗材宽度
 diy_height = "30"                    # 自定义耗材高度
@@ -66,11 +73,11 @@ EXCLUDE_TEXTS = {
 """
 
 # ----------------页面上滑----------------
-def swipe_up(driver, duration=800):
+def swipe_up(driver, duration=300):
     """页面上滑操作
 
     :param driver: WebDriver实例
-    :param duration: 滑动持续时间，默认800ms
+    :param duration: 滑动持续时间，默认300ms（快滑才会带动惯性，慢拖容易回弹不到底）
     :return: None
     """
     size = driver.get_window_size()
@@ -85,7 +92,7 @@ def swipe_up(driver, duration=800):
 
 
 # ----------------元素左右滑动----------------
-def swipe_by_element(driver, by, locator, direction="left", duration=600):
+def swipe_by_element(driver, by, locator, direction="left", duration=250):
     """
     从指定元素中心向左或向右滑动。
 
@@ -291,6 +298,28 @@ def perform_single_tap(driver, x: int, y: int, tap_duration: float = 0.1):
 #     print("脱机体验页机型校验测试执行完成")
 
 
+
+def test_connect_devices(driver):
+    """连接设备测试
+
+    :param driver: WebDriver实例
+    :return: None
+    """
+    # 点击去连接
+
+    wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
+
+    wait_for_element(driver, *LOCATORS["go_connect"]).click()
+    time.sleep(3)
+    # 设备列表是 RecyclerView（rvBluetoothList），只渲染可见项：
+    # 目标机器排在下面时这里是「压根找不到」，等再久也等不到 —— 找不到就上滑继续找
+    find_with_swipe(
+        driver,
+        By.XPATH,
+        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'
+    ).click()
+
+
 def test_add_all_function(driver):
     """添加所有编辑功能到功能栏
 
@@ -306,13 +335,16 @@ def test_add_all_function(driver):
     # 点击新建标签
     wait_for_element(driver, *LOCATORS["create_new"]).click()
 
+    # 首次连接引导弹窗（盖住编辑页，会让后面的滑动/点击全部失效）
+    dismiss_first_connect_guide(driver)
+
     # 左滑
-    swipe_by_element(d+river, *LOCATORS["kata_excel"],
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
         direction="left"
     )
 
     # 点击更多
-    wait_for_element(driver, *LOCATORS["kata_more"]).click()
+    wait_for_element(driver, *LOCATORS["more"]).click()
 
     # 添加编辑功能到功能栏
     wait_for_element(driver, *LOCATORS["tab_标识"]).click()
@@ -364,23 +396,7 @@ def test_loginin(driver):
     wait_for_element(driver, *LOCATORS["home_tab"]).click()
     print('登录成功')
 
-def test_connect_devices(driver):
-    """连接设备测试
 
-    :param driver: WebDriver实例
-    :return: None
-    """
-    # 点击去连接
-
-    wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
-
-    wait_for_element(driver, *LOCATORS["go_connect"]).click()
-
-    wait_for_element(
-        driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'
-    ).click()
 
 def test_text1(driver):
     """测试文本功能--双击编辑，添加文本，对齐功能
@@ -391,9 +407,11 @@ def test_text1(driver):
     # 点击新建标签
     wait_for_element(driver, *LOCATORS["create_new"]).click()
 
-    wait_for_element(driver, *LOCATORS["first_connection_close"]).click()
+    # 首次连接引导弹窗：点完「新建」后几秒才淡入，且会盖住整个编辑页。
+    # 用专用函数轮询等待（不是抢 3s），出现就点掉、点不掉会报错而不是静默跳过
+    dismiss_first_connect_guide(driver)
 
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
     wait_for_element(driver, *LOCATORS["confirm"]).click()
 
@@ -415,9 +433,9 @@ def test_text2(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
-
+    wait_for_element(driver, *LOCATORS["text"]).click()
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
     wait_for_element(driver, *LOCATORS["confirm"]).click()
 
@@ -425,8 +443,9 @@ def test_text2(driver):
         wait_for_element(driver, *LOCATORS["shrink_btn"]).click()
 
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
 
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
     wait_for_element(driver, *LOCATORS["confirm"]).click()
@@ -448,8 +467,9 @@ def test_font(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
 
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
     wait_for_element(driver, *LOCATORS["font_btn"]).click()
@@ -457,9 +477,12 @@ def test_font(driver):
     wait_for_element(driver, *LOCATORS["download_more_font"]).click()
 
     wait_for_element(driver, *LOCATORS["font_download_item_1"]).click()
-
+    time.sleep(3)
     wait_for_element(driver, *LOCATORS["font_back"]).click()
-    wait_for_element(driver, *LOCATORS["view"]).click()
+
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
 
 def test_inverse(driver):
     """测试文本功能--反色功能
@@ -467,12 +490,15 @@ def test_inverse(driver):
         :param driver: WebDriver实例
         :return: None
     """
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
 
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
     wait_for_element(driver, *LOCATORS["confirm"]).click()
-    for _ in range(5):
-        wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    for _ in range(3):
+        # 左滑
+        swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                         direction="left"
+                         )
 
     wait_for_element(driver, *LOCATORS["feature_反色"]).click()
 
@@ -484,15 +510,21 @@ def test_test3(driver):
     """
     #新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     #回到功能栏首位置
-    for _ in range(6):
-        wait_for_element(driver, *LOCATORS["enter_left"]).click()
+    for _ in range(3):
+        # 右滑
+        swipe_by_element(driver, *LOCATORS["Function Bar_1"],
+                         direction="right"
+                         )
     #点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     #点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
     #开启自动换行
     wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
+    #点击键盘（唤起软键盘后输入）
+    wait_for_element(driver, *LOCATORS["keyboard_btn"]).click()
     #输入内容
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
     #点击确定
@@ -502,86 +534,102 @@ def test_text4(driver):
     #调整字宽（放大两次）
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     # 点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     #输入内容
-    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动换行测试自动换行测试自动换行测试自动换行')
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试字宽测试字宽')
     #点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
     #放大两次字宽
     wait_for_element(driver, *LOCATORS["word_width_add"]).click()
     wait_for_element(driver, *LOCATORS["word_width_add"]).click()
-    #点击确定
-    wait_for_element(driver, *LOCATORS["confirm"]).click()
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
 
-    #文字方向
+    # ------------测试自动字号-----------------------------
 def test_text5(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     # 点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     # 输入内容
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('文字方向文字方向')
     # 点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
     #选择弧形文字方向
     wait_for_element(driver, *LOCATORS["text_direction_c"]).click()
-    # 点击确定
-    wait_for_element(driver, *LOCATORS["confirm"]).click()
-#------------测试字效-----------------------------
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
+
+
+    #------------测试字效----------------------------
 def test_text6(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+
     # 点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     # 输入内容
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('添加不同字效')
     # 点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
-    #页面上滑
-    swipe_up(driver)
     #单击字效开关（倾斜）
     wait_for_element(driver, *LOCATORS["effect_italic"]).click()
     #下划线
     wait_for_element(driver, *LOCATORS["effect_underline"]).click()
-    # 点击确定
-    wait_for_element(driver, *LOCATORS["confirm"]).click()
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
 
+    #------------测试自动字号-----------------------------
 def test_text7(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     #点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
     #点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
     #关闭自动换行
     wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
     #开启自动字号
     wait_for_element(driver, *LOCATORS["font_size_auto"]).click()
+    #点击键盘（唤起软键盘后输入）
+    wait_for_element(driver, *LOCATORS["keyboard_btn"]).click()
     #输入内容
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试自动字号功能测试自动字号')
-    # 点击确定--关闭样式弹窗
-    wait_for_element(driver, *LOCATORS["confirm"]).click()
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
+
+    #------------测试字间距，行间距-----------------------------
 def test_text8(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     # 点击文本
-    wait_for_element(driver, *LOCATORS["kata_text"]).click()
+    wait_for_element(driver, *LOCATORS["text"]).click()
+    #输入内容
+    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试文本设置字间距和行间距测试文本设置字间距和行间距')
     # 点击样式
     wait_for_element(driver, *LOCATORS["typeface"]).click()
     # 开启自动换行
     wait_for_element(driver, *LOCATORS["layout_mode_switch"]).click()
     #页面上滑（有些机型该页面看不到行间距）
     swipe_up(driver)
-    #输入内容
-    wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试文本设置字间距和行间距测试文本设置字间距和行间距')
     #设置字间距为10
     wait_for_element(driver, *LOCATORS["font_space"]).send_keys('10')
     #设置行间距为-10
     wait_for_element(driver, *LOCATORS["line_space"]).clear()
     wait_for_element(driver, *LOCATORS["line_space"]).send_keys('-10')
-    #关闭样式弹窗
-    wait_for_element(driver, *LOCATORS["confirm"]).click()
+    # 「view」（编辑区画布）原 id 定位已失效，改走坐标盲点：
+    # 坐标写在 locators.py 的 "view" 条目里（左右居中、垂直 1/3 处）
+    tap_ratio(driver, *LOCATORS["view"])
 
 
 def test_repeat(driver):
@@ -595,7 +643,7 @@ def test_repeat(driver):
     wait_for_element(driver, *LOCATORS["repeat_input"]).send_keys('3')
     wait_for_element(driver, *LOCATORS["repeat_affirm"]).click()
 
-#---------------一维码----------------------
+    #---------------一维码----------------------
 def test_barcode(driver):
     """测试一维码功能
 
@@ -604,15 +652,18 @@ def test_barcode(driver):
     """
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     wait_for_element(driver, *LOCATORS["feature_一维码"]).click()
 
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('6901236040287')
     #关闭字符开关
     wait_for_element(driver, *LOCATORS["barcode_chars_switch"]).click()
     wait_for_element(driver, *LOCATORS["affirm"]).click()
+
 def test_barcode2(driver):
     # 新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     wait_for_element(driver, *LOCATORS["feature_一维码"]).click()
     #选择条码类型--CODE-11
     wait_for_element(driver, *LOCATORS["barcode_type_dropdown"]).click()
@@ -628,11 +679,11 @@ def test_barcode2(driver):
     wait_for_element(driver, *LOCATORS["align_right"]).click()
     #点击字体
     wait_for_element(driver, *LOCATORS["barcode_typeface"]).click()
-    #页面上滑可看到下载更多字体的元素（可点击）
+    # 上滑
     swipe_up(driver)
-    #下载更多字体
-    wait_for_element(driver, *LOCATORS["download_more_font"]).click()
+    scroll_into_view(driver, *LOCATORS["download_more_font2"]).click()
     wait_for_element(driver, *LOCATORS["font_download_item_2"]).click()
+    time.sleep(3)
     #返回
     wait_for_element(driver, *LOCATORS["font_back"]).click()
     #点击确定
@@ -645,6 +696,7 @@ def test_qrcode(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_二维码"]).click()
 
@@ -659,6 +711,7 @@ def test_photo(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_图片"]).click()
 
@@ -676,7 +729,11 @@ def test_excel(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     wait_for_element(driver, *LOCATORS["feature_Excel"]).click()
 
@@ -698,6 +755,7 @@ def test_shape(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_形状"]).click()
 
@@ -713,7 +771,11 @@ def test_cable_label1(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     wait_for_element(driver, *LOCATORS["feature_线缆标签"]).click()
 
@@ -726,6 +788,7 @@ def test_cable_label1(driver):
 def test_cable_label2(driver):
     #新增标签
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
     #选择线缆标签
     wait_for_element(driver, *LOCATORS["feature_线缆标签"]).click()
     #类型选择两折不同
@@ -759,7 +822,11 @@ def test_symbol_frame(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     wait_for_element(driver, *LOCATORS["feature_标识"]).click()
 
@@ -789,6 +856,7 @@ def test_logo(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_logo"]).click()
 
@@ -802,7 +870,11 @@ def test_line(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     for _ in range(3):
         wait_for_element(driver, *LOCATORS["feature_线"]).click()
@@ -815,7 +887,11 @@ def test_sketch(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     wait_for_element(driver, *LOCATORS["feature_涂鸦"]).click()
 
@@ -843,6 +919,7 @@ def test_terminal_port(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_端子端口"]).click()
     #点击绘制边框
@@ -894,7 +971,11 @@ def test_date(driver):
     :return: None
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
-    wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
+    # 左滑
+    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                     direction="left"
+                     )
 
     wait_for_element(driver, *LOCATORS["feature_日期"]).click()
     #开启实时时间
@@ -919,6 +1000,7 @@ def test_table(driver):
     width = size["width"]
     height = size["height"]
     wait_for_element(driver, *LOCATORS["add_label"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
     wait_for_element(driver, *LOCATORS["feature_表格"]).click()
 
@@ -957,7 +1039,7 @@ def  test_prewiew(driver):
         800
     )
 
-    wait_for_element(driver, *LOCATORS["interior_handle"]).click()
+    wait_for_element(driver, *LOCATORS["close_preview"]).click()
 
 
 def test_savetemplate1(driver):
@@ -987,8 +1069,11 @@ def test_savetemplate2(driver):
     wait_for_element(driver, *LOCATORS["create_new"]).click()
     #标签旋转
     wait_for_element(driver, *LOCATORS["canvas_rotation"]).click()
-    for _ in range(4):
-        wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    for _ in range(2):
+        # 左滑
+        swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                         direction="left"
+                         )
     #选择序号
     wait_for_element(driver, *LOCATORS["feature_序号"]).click()
 
@@ -1120,8 +1205,8 @@ def test_print_setting(driver):
     # 点击去连接
     wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
     wait_for_element(driver, *LOCATORS["go_connect"]).click()
-    # 连接另一台机器
-    wait_for_element(
+    # 连接另一台机器（同样：设备列表要滑才能看到目标机器，找不到就上滑继续找）
+    find_with_swipe(
         driver,
         By.XPATH,
         f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]'
@@ -1174,8 +1259,11 @@ def test_DIY(driver):
     wait_for_element(driver, *LOCATORS["template_file_item_1"]).click()
     wait_for_element(driver, *LOCATORS["affirm"]).click()
 
-    for _ in range(3):
-        wait_for_element(driver, *LOCATORS["enter_right"]).click()
+    for _ in range(2):
+        # 左滑
+        swipe_by_element(driver, *LOCATORS["Function Bar_5"],
+                         direction="left"
+                         )
 
     # 点击添加一个边框
     wait_for_element(driver, *LOCATORS["feature_边框"]).click()
@@ -1187,10 +1275,8 @@ def test_DIY(driver):
     wait_for_element(driver, *LOCATORS["cancel"]).click()
 
     # 添加文本
-    # 双击编辑区进行编辑
-    double_click(
-        wait_for_element(driver, *LOCATORS["paint_view"]).click()
-    )
+    # 双击编辑区进行编辑（画布 id 定位已失效，改走坐标盲点双击）
+    tap_ratio(driver, *LOCATORS["paint_view"], times=2)
     # 输入文本
     wait_for_element(driver, *LOCATORS["input_edit"]).send_keys('测试123')
 

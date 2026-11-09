@@ -12,6 +12,12 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
 
+# 伪定位方式：值为「屏幕比例坐标」 (x_ratio, y_ratio)，取值范围 0~1，
+# 运行时按 driver.get_window_size() 的实际分辨率换算成像素 —— 换机型/模拟器不用改。
+# 用于「元素定位彻底失效、只能盲点」的场景，配 utils.element_helper.tap_ratio 使用。
+COORDINATE = "coordinate"
+
+
 LOCATORS = {
     # ================= 通用 =================
     "create_new": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivCreateNew"),            # 新建标签
@@ -21,12 +27,16 @@ LOCATORS = {
     "affirm": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivAffirm"),                  # 确定（条码/耗材等）
     "tv_confirm": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvConfirm"),             # 确定（保存模板/打印）
     "cancel": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivCancel"),                  # 取消
-    "view": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_paint_view"),  # 编辑区画布
+    # 编辑区画布：原 id 定位已失效，改为坐标盲点（屏幕左右居中、垂直 2/3 处）
+    "view": (COORDINATE, (0.5, 1 / 3)),  # 编辑区画布（坐标盲点，非元素定位）
     "enter_right": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_enter_right_iv"),  # 功能栏右翻
     "enter_left": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_enter_left_iv"),    # 功能栏左翻
     "go_connect": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvGoConnect"),           # 去连接
     "main_back_btn": (AppiumBy.XPATH, '//android.widget.LinearLayout[@resource-id="com.fhit.app_iprinter:id/my_activity_main_lp_back_ll"]/android.widget.ImageView'),  # 主页返回
     "back_btn": (AppiumBy.XPATH, '//android.view.ViewGroup[@resource-id="com.fhit.app_iprinter:id/clPageTitle"]/android.widget.ImageView'),  # 页头返回
+    "Function Bar_5": (AppiumBy.XPATH,'(//android.view.ViewGroup[@resource-id="com.fhit.app_iprinter:id/llKataMyObjectSetting"])[5]'),    # 专业风功能栏第五个元素，用于实现左滑动能
+    "Function Bar_1": (AppiumBy.XPATH,'(//android.view.ViewGroup[@resource-id="com.fhit.app_iprinter:id/llKataMyObjectSetting"])[1]'),    # 专业风功能栏第1个元素，用于实现右滑动能
+
 
     # ================= 登录 =================
     "personal_info_enter": (AppiumBy.ID, "com.fhit.app_iprinter:id/rlPersonalInformationEnter"),  # 个人中心入口
@@ -41,26 +51,26 @@ LOCATORS = {
     "first_connection_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivFirstConnectionClose"),   # 首次连接引导关闭
 
     # ================= 功能栏入口（金刚区/横向滚动） =================
-    "kata_text": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="文本"]'),      # 文本
-    "kata_excel": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="Excel"]'),   # Excel
-    "kata_more": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="更多"]'),     # 更多
-    "feature_反色": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="反色"]'),
-    "feature_一维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="一维码"]'),
-    "feature_二维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="二维码"]'),
-    "feature_图片": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="图片"]'),
-    "feature_Excel": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="Excel"]'),
-    "feature_形状": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="形状"]'),
-    "feature_线缆标签": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="线缆标签"]'),
-    "feature_标识": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="标识"]'),
-    "feature_边框": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="边框"]'),
-    "feature_符号": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="符号"]'),
-    "feature_logo": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="logo"]'),
-    "feature_线": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="线"]'),
-    "feature_涂鸦": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="涂鸦"]'),
-    "feature_端子端口": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="端子/端口"]'),
-    "feature_日期": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="日期"]'),
-    "feature_表格": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="表格"]'),
-    "feature_序号": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="序号"]'),
+    "text": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="文本"]'),      # 文本
+    "excel": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="Excel"]'),   # Excel
+    "more": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="更多"]'),     # 更多
+    "feature_反色": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="反色"]'),
+    "feature_一维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="一维码"]'),
+    "feature_二维码": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="二维码"]'),
+    "feature_图片": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="图片"]'),
+    "feature_Excel": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="Excel"]'),
+    "feature_形状": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="形状"]'),
+    "feature_线缆标签": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="线缆标签"]'),
+    "feature_标识": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="标识"]'),
+    "feature_边框": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="边框"]'),
+    "feature_符号": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="符号"]'),
+    "feature_logo": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="logo"]'),
+    "feature_线": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="线"]'),
+    "feature_涂鸦": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="涂鸦"]'),
+    "feature_端子端口": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="端子/端口"]'),
+    "feature_日期": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="日期"]'),
+    "feature_表格": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="表格"]'),
+    "feature_序号": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="序号"]'),
 
     # ================= 添加功能弹窗（tvTabTitle 各Tab） =================
     "tab_标识": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTabTitle" and @text="标识"]'),
@@ -86,25 +96,28 @@ LOCATORS = {
     "align_v_top": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivVerticalTop"),            # 垂直顶对齐
     "align_v_center": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivVerticalCenter"),      # 垂直居中对齐
     "setting_align": (AppiumBy.ID, "com.fhit.app_iprinter:id/htiSettingAlign"),        # 对齐设置
+    "keyboard_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvKeyboard"),              # 键盘（唤起软键盘输入）
 
     # ================= 文本样式 =================
     "typeface": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvTypeface"),                  # 样式
     "layout_mode_switch": (AppiumBy.ID, "com.fhit.app_iprinter:id/sLayoutMode"),       # 自动换行开关
     "word_width_add": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivWordWidthAdd"),        # 字宽放大
     "text_direction_c": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivTextDirectionC"),    # 弧形文字方向
-    "effect_italic": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivEffectI"),              # 字效-倾斜
-    "effect_underline": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivEffectU"),           # 字效-下划线
+    "effect_italic": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivEffectItalic"),              # 字效-倾斜
+    "effect_underline": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivEffectUnderline"),           # 字效-下划线
     "font_size_auto": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivFontSizeAuto"),        # 自动字号
     "font_space": (AppiumBy.ID, "com.fhit.app_iprinter:id/etFontSpace"),               # 字间距输入框
     "line_space": (AppiumBy.ID, "com.fhit.app_iprinter:id/etLineSpace"),               # 行间距输入框
     "font_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvFont"),                      # 字体
     "font_back": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_font_back"),      # 字体页返回
     "download_more_font": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'),  # 下载更多字体
+    "download_more_font2": (AppiumBy.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'),   # 点击字体列表里第八个，下载更多字体
     "font_download_item_1": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[1]'),  # 字体下载项1
     "font_download_item_2": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[2]'),  # 字体下载项2
 
+
     # ================= 重复份数 =================
-    "repeat_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivRepeat"),                  # 重复份数入口
+    "repeat_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/htiSettingRepeat"),                  # 重复份数入口
     "repeat_input": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_dialog_repetition_et"),  # 份数输入框
     "repeat_affirm": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_dialog_repetition_iv_affirm"),  # 份数确定
 
@@ -190,7 +203,7 @@ LOCATORS = {
 
     # ================= 预览 =================
     "preview_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_preview_tv"),           # 预览
-    "interior_handle": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_interior_handle_iv"),  # 内页把手
+    "close_preview": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_interior_handle_iv"),  # 收起预览
 
     # ================= 保存模板 =================
     "save_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_save_iv"),    # 保存
@@ -227,7 +240,8 @@ LOCATORS = {
     "consumable_gap": (AppiumBy.ID, "com.fhit.app_iprinter:id/etDieCuttingInterval"),    # 间隙输入框
     "consumable_delete_picture": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivDeletePicture"),  # 删除图片
     "consumable_save": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvSave"),                 # 保存
-    "paint_view": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_main_lp_paint_view"),  # 画布/编辑区
+    # 画布/编辑区：同 view，id 定位已失效，改坐标盲点（双击进入编辑）
+    "paint_view": (COORDINATE, (0.5, 1 / 3)),  # 画布/编辑区（坐标盲点，双击进入编辑）
 
     # ================= 打印设置 =================
     "print_tab": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="打印"]'),  # 打印Tab
@@ -245,7 +259,7 @@ LOCATORS = {
     "terminal_clear_first": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivClearFirst"),      # 清除端子宽度A
     "table_attribute": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvText" and @text="属性"]'),  # 表格属性
     "border_item_1": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[1]'),  # 边框1
-    "feature_文本": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/item_adapter_lp_custom_horizontal_scroll_view_tv" and @text="文本"]'),  # 文本（横向滚动）
+    "feature_文本": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvKataMyObjectSetting" and @text="文本"]'),  # 文本（横向滚动）
 
     # ================= 家用风新版UI：首页/编辑 =================
     "enter_new_version": (AppiumBy.XPATH, '//android.widget.TextView[@text="进入新版"]'),  # 进入新版
