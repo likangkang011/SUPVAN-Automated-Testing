@@ -277,6 +277,7 @@ LOCATORS = {
     "back": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivBack"),                            # 关闭时间弹窗
     "home_back": (AppiumBy.ID, "com.fhit.app_iprinter:id/iv_back"),                      # 返回
     "material_info_icon": (AppiumBy.ID, "com.fhit.app_iprinter:id/tv_material_info_icon"),  # 耗材信息图标
+    "quick_login_btn":(AppiumBy.XPATH,'//android.widget.TextView[@text="其他手机号登录"]'),#快捷登录页面使用手机号登录
 
     # ================= 家用风新版UI：功能区入口（tvKataMyObjectSetting） =================
 
@@ -323,7 +324,7 @@ LOCATORS = {
     "next_page": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivNextPage"),                   # 下一页
 
     # ================= 家用风新版UI：符号/边框/形状/涂鸦 =================
-    "symbol_exclamation": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/my_item_symbol_tv" and @text="1"]'),  # 符号!
+    "symbol_exclamation": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivSvgSymbol"])[1]'),  # 符号!
     "label_produce_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogLabelProduce"),  # 收起功能区域
     "border_item_3": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/ivBorder"])[3]'),  # 边框3
     "wire_frame_close": (AppiumBy.ID, "com.fhit.app_iprinter:id/ivKataMyDialogWireFrame"),  # 收起边框弹窗
