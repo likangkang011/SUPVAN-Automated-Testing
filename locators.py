@@ -17,6 +17,13 @@ from appium.webdriver.common.appiumby import AppiumBy
 # 用于「元素定位彻底失效、只能盲点」的场景，配 utils.element_helper.tap_ratio 使用。
 COORDINATE = "coordinate"
 
+# 伪定位方式：值为「候选定位组」，按顺序逐个尝试，第一个命中的生效。
+# 用于「同一个控件在不同 ROM / App 版本里定位完全不同」的场景（典型：系统相册）。
+# 写法必须是 tuple 套 tuple（不能写 list，否则下面反向索引会因不可哈希报错）：
+#     "key": (MULTI, ((AppiumBy.XPATH, "..."), (AppiumBy.ID, "...")))
+# 配 utils.element_helper.find_any / click_any 使用。
+MULTI = "multi"
+
 
 LOCATORS = {
     # ================= 通用 =================
@@ -111,7 +118,7 @@ LOCATORS = {
     "font_btn": (AppiumBy.ID, "com.fhit.app_iprinter:id/tvFont"),                      # 字体
     "font_back": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_activity_font_back"),      # 字体页返回
     "download_more_font": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'),  # 下载更多字体
-    "download_more_font2": (AppiumBy.XPATH,'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvTextFont" and @text="下载更多"]'),   # 点击字体列表里第八个，下载更多字体
+    "download_more_font2": (AppiumBy.XPATH,'(//android.view.ViewGroup[@resource-id="com.fhit.app_iprinter:id/rlFont"])[8]'),   # 点击字体列表里第八个，下载更多字体
     "font_download_item_1": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[1]'),  # 字体下载项1
     "font_download_item_2": (AppiumBy.XPATH, '(//android.widget.ImageView[@resource-id="com.fhit.app_iprinter:id/my_item_font_adapter_download"])[2]'),  # 字体下载项2
 
@@ -132,8 +139,25 @@ LOCATORS = {
 
     # ================= 图片 =================
     "photo_album": (AppiumBy.ID, "com.fhit.app_iprinter:id/my_dialog_picture_photo_album_tv"),  # 相册
-    "photo_check_1": (AppiumBy.XPATH, '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]'),  # 选中第1张
-    "photo_complete": (AppiumBy.ID, "com.fhit.app_iprinter:id/ps_tv_complete"),        # 完成
+    # --- 以下两条是 app 自带图库的 id：app 改调系统相册后已不再出现，保留供旧版本回滚参考 ---
+    "photo_check_1": (AppiumBy.XPATH, '(//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/tvCheck"])[1]'),  # 选中第1张（旧版 app 图库，已失效）
+    "photo_complete": (AppiumBy.ID, "com.fhit.app_iprinter:id/ps_tv_complete"),        # 完成（旧版 app 图库，已失效）
+    # 系统相册：各 ROM 结构完全不同（实测 OPPO ColorOS / 小米 MIUI），这里放「跨厂商通用的语义定位」，
+    # 厂商专属定位放 utils/photo_picker.py 的 PICKER_PROFILES（按图库包名优先匹配）。
+    # 通用逻辑：缩略图的 content-desc 一定带日期，且「最新一张」排在最前。
+    "photo_pick_first": (MULTI, (  # 系统相册第一张（最新一张），通用语义候选
+        (AppiumBy.XPATH, '//*[contains(@content-desc,"第 1 项")]'),                       # OPPO ColorOS：",第 1 项,图片,,日期"
+        (AppiumBy.XPATH, '(//*[starts-with(@content-desc,"照片") and string-length(@content-desc) > 3])[1]'),  # 小米/华为："照片，日期"（排除同名 tab）
+        (AppiumBy.XPATH, '(//*[contains(@content-desc,"年") and contains(@content-desc,"月") and contains(@content-desc,"日")])[1]'),  # 通用：desc 带日期
+        (AppiumBy.XPATH, '(//*[contains(@content-desc,"Photo")])[1]'),                    # 英文系统
+    )),  # 系统相册第一张（最新一张）
+    "photo_pick_confirm": (MULTI, (  # 相册「完成/确定」，只有多选模式才出现
+        (AppiumBy.XPATH, '//*[@text="完成"]'),
+        (AppiumBy.XPATH, '//*[@text="确定"]'),
+        (AppiumBy.XPATH, '//*[@text="添加"]'),
+        (AppiumBy.XPATH, '//*[@content-desc="完成"]'),
+        (AppiumBy.XPATH, '//*[@content-desc="确定"]'),
+    )),  # 相册「完成/确定」（单选点完自动返回，没有这个按钮）
     "menu_crop": (AppiumBy.ID, "com.fhit.app_iprinter:id/menu_crop"),                  # 裁剪
 
     # ================= Excel =================

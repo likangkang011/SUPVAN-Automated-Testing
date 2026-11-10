@@ -34,7 +34,7 @@ from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from locators import COORDINATE, LOCATORS
+from locators import COORDINATE, LOCATORS, MULTI
 from utils.logger import get_logger
 
 logger = get_logger("element")
@@ -344,6 +344,11 @@ def _click_element_or_point(driver, element):
         return False
 
 
+def tap_element(driver, element):
+    """点元素：click() 失败/无效时按元素中心坐标补一枪（自绘控件常吞 click）。"""
+    return _click_element_or_point(driver, element)
+
+
 def _wait_until_gone(driver, by, locator, timeout):
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -628,6 +633,178 @@ def click_with_swipe(driver, by, locator, timeout=2, max_swipe=5, name=None,
     return find_with_swipe(
         driver, by, locator, timeout, max_swipe, name, direction, settle, swipe_duration
     ).click()
+
+
+# ============ 点击后要等「真的生效」的按钮（如连接设备） ============
+# 有些按钮点下去不报错、也不生效（连接超时、列表没刷新、点击被自绘控件吞掉）。
+# 光「点到了」不等于「点成功了」，所以要：点击 → 轮询成功标志 → 没生效就重点一次。
+
+_TIP_TEXTS = ("确定", "知道了", "我知道了", "好的", "取消", "重试")
+
+
+def _is_success(driver, success):
+    """成功标志是否满足。success 可以是 (by, locator) 元组，也可以是 callable(driver)->bool。"""
+    if success is None:
+        return True
+    if callable(success):
+        try:
+            return bool(success(driver))
+        except Exception:
+            return False
+    by, locator = success
+    return bool(_visible_elements(driver, by, locator))
+
+
+def dismiss_tips(driver, texts=_TIP_TEXTS):
+    """点掉挡路的普通提示框（连接失败 / 超时 / 权限提示），点掉一个就返回 True。
+
+    只在重试前调用，避免影响正常流程。
+    """
+    for text in texts:
+        els = _visible_elements(driver, "xpath", f'//*[@text="{text}"]')
+        if els:
+            logger.info("🧹 关闭提示框（text=%s）", text)
+            _click_element_or_point(driver, els[0])
+            time.sleep(0.4)
+            return True
+    return False
+
+
+def click_with_retry(driver, by, locator, success=None, retries=3, success_timeout=8.0,
+                     name=None, success_name=None, poll=0.3, retry_wait=1.0,
+                     swipe=True, max_swipe=5, dismiss_on_retry=True):
+    """点击一个「点完要等它生效」的按钮：没生效就重新点，最多 retries 次。
+
+    典型场景：连接设备 —— 点机器序列号后 app 不会报错，但可能什么都没发生，
+    仍停在「查找设备」页。这里点完先等「成功标志」出现，没出现就再点。
+
+    :param success: 成功标志。(by, locator) 元组（该元素出现即成功），
+                    或 callable(driver) -> bool 自定义判定
+    :param retries: 最多点几次
+    :param success_timeout: 每次点击后等多久算「没生效」
+    :param swipe: True 时用 find_with_swipe 定位（列表项可能还没渲染出来）
+    :param dismiss_on_retry: 重试前先点掉「确定/知道了/取消」这类提示框
+    :return: True（生效）
+    :raises ElementLocateError: 重试用尽仍未生效，同时落盘截图 + 页面源码
+    """
+    desc = _describe(by, locator, name)
+    sdesc = (_describe(success[0], success[1], success_name)
+             if isinstance(success, tuple) and len(success) == 2 else "自定义判定")
+
+    for attempt in range(1, retries + 1):
+        logger.info("🔗 第 %d/%d 次点击 %s（成功标志：%s）", attempt, retries, desc, sdesc)
+
+        if swipe:
+            element = find_with_swipe(driver, by, locator, max_swipe=max_swipe, name=name)
+        else:
+            element = wait_visible(driver, by, locator, name=name)
+        _click_element_or_point(driver, element)
+
+        deadline = time.time() + success_timeout
+        while time.time() < deadline:
+            if _is_success(driver, success):
+                logger.info("✅ 第 %d 次点击已生效 %s", attempt, desc)
+                return True
+            time.sleep(poll)
+
+        if attempt < retries:
+            logger.warning("⚠️ 第 %d 次点击后 %.1fs 内没有生效，重试 %s", attempt, success_timeout, desc)
+            if dismiss_on_retry:
+                dismiss_tips(driver)
+            time.sleep(retry_wait)
+
+    # 重试用尽：落盘现场 + 点名报错
+    still_there = bool(_visible_elements(driver, by, locator))
+    png, xml = _dump_artifacts(driver, f"{desc}_点击重试失败")
+    lines = [
+        f"❌ 点击 {retries} 次仍未生效：{desc}",
+        f"   每次点击后已等待 {success_timeout:.1f}s，成功标志「{sdesc}」始终没出现",
+        f"   最后一次点击后目标元素{'仍停留在页面上' if still_there else '已不在页面上'}",
+        "   → 常见原因：设备没连上 / 连接超时 / 提示框挡住 / 点击被页面吞掉",
+    ]
+    if png or xml:
+        lines.append(f"   现场已落盘：{png or '-'} / {xml or '-'}")
+    msg = "\n".join(lines)
+    logger.error(msg)
+    raise ElementLocateError(msg, key=name or _key_of(by, locator), by=by, locator=locator)
+
+
+# ============ 候选定位组（同一个控件在不同 ROM / 版本里定位完全不同） ============
+# 定位写在 locators.py 里，值形如：
+#     "photo_pick_first": (MULTI, ((AppiumBy.XPATH, "…"), (AppiumBy.ID, "…")))
+# 用例照常按 key 引用，运行到这里按顺序逐个试，第一个命中的生效。
+# 典型场景：系统相册（OPPO ColorOS / 小米 MIUI 的 id、class、desc 全不一样）。
+
+def _short(value, limit=90):
+    """日志里用的短描述。"""
+    text = str(value)
+    return text if len(text) <= limit else text[:limit] + "…"
+
+
+def _normalize_candidates(by, candidates):
+    """校验候选定位组格式，返回 [(by, locator), ...]。"""
+    if by != MULTI:
+        raise ValueError(
+            "find_any/click_any 只接受 locators.py 的候选组条目 "
+            f"(MULTI, ((by, locator), ...))，收到 by={by!r}；单个元素请用 wait_for_element()"
+        )
+    if isinstance(candidates, (str, bytes)) or not hasattr(candidates, "__iter__"):
+        raise ValueError(f"候选组应为可迭代的 ((by, locator), ...)，收到 {candidates!r}")
+
+    out = []
+    for item in candidates:
+        if not isinstance(item, (tuple, list)) or len(item) != 2:
+            raise ValueError(f"候选组每项应为 (by, locator)，收到 {item!r}")
+        out.append((item[0], item[1]))
+    if not out:
+        raise ValueError("候选组是空的")
+    return out
+
+
+def find_any(driver, by, candidates, timeout=1.5, name=None, poll=0.25):
+    """候选定位组：按顺序逐个尝试，返回第一个命中的元素。
+
+        find_any(driver, *LOCATORS["photo_pick_first"]).click()
+
+    每个候选只等 timeout 秒（默认 1.5s）—— 候选是"结构不同但目标相同"的等价写法，
+    不该为每个候选都等满 10s，否则新机型上一次失败要拖一分钟。
+
+    :param timeout: **每个候选**的最长等待时间（秒）
+    :param name: 日志里的名字，不传则反查 locators.py 的 key
+    :return: 命中的元素
+    :raise ElementLocateError: 所有候选都没命中（落盘现场 + 列出试过哪些）
+    """
+    cands = _normalize_candidates(by, candidates)
+    key = name or _key_of(by, candidates)
+    desc = f"『{key}』[候选组 {len(cands)} 项]" if key else f"[候选组 {len(cands)} 项]"
+    logger.info("🔎 候选定位 %s：共 %d 个候选，逐个尝试（每个最多 %ss）",
+                desc, len(cands), timeout)
+
+    tried = []
+    for i, (c_by, c_loc) in enumerate(cands, 1):
+        element = _poll_visible(driver, c_by, c_loc, timeout, poll)
+        if element is not None:
+            logger.info("✅ 第 %d/%d 个候选命中 %s：%s", i, len(cands), desc, _short(c_loc))
+            return element
+        tried.append(f"   {i}. [{c_by}] {_short(c_loc)}")
+
+    png, xml = _dump_artifacts(driver, desc)
+    lines = ["", "=" * 72, f"❌ 候选定位全部落空：{desc}", "   已逐个尝试（每个等 %ss）：" % timeout]
+    lines.extend(tried)
+    if png:
+        lines.append(f"   失败截图：{png}")
+    if xml:
+        lines.append(f"   页面源码：{xml}")
+    lines.append("   → 若是新机型/新系统图库，把该页面首图的有效定位补到 locators.py 的对应候选组里")
+    lines.append("=" * 72)
+    msg = "\n".join(lines)
+    logger.error(msg)
+    raise ElementLocateError(msg, key=name or _key_of(by, candidates), by=by, locator=candidates)
+
+
+def click_any(driver, by, candidates, timeout=1.5, name=None, poll=0.25):
+    """候选定位组：命中第一个就点击（find_any + click 的简写）。"""
+    return find_any(driver, by, candidates, timeout, name, poll).click()
 
 
 # ============================ 按语义 key 调用 ============================

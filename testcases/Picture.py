@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from locators import LOCATORS
+from utils.photo_picker import pick_first_photo
 
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -32,12 +33,8 @@ time.sleep(1)
 driver.find_element(*LOCATORS["photo_album"]).click()
 time.sleep(1)
 
-# 选择相册里的第一张图片
-driver.find_element(*LOCATORS["photo_check_1"]).click()
-time.sleep(1)
-
-# 点击已完成
-driver.find_element(*LOCATORS["photo_complete"]).click()
+# 选择相册里的第一张图片（系统相册，各 ROM 结构不同，走适配层）
+pick_first_photo(driver)
 time.sleep(1)
 
 # 点击确定

@@ -238,6 +238,9 @@ def check(entries=None, duplicated=None, usage=None):
 
     by_sel = {}
     for e in entries:
+        if e["by"] == "MULTI":
+            # 候选定位组：本身就不是"单一 selector"，多个候选组之间不构成重复
+            continue
         by_sel.setdefault((e["by"], e["selector"]), []).append(e)
     for (by, sel), group in by_sel.items():
         if len(group) > 1:

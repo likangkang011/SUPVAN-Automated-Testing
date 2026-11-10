@@ -27,7 +27,9 @@ from utils.element_helper import (
     dismiss_first_connect_guide,
     find_with_swipe,
     click_with_swipe,
+    click_with_retry,
 )
+from utils.photo_picker import pick_first_photo
 
 
 # ----------------统一管理变量----------------
@@ -313,11 +315,18 @@ def test_connect_devices(driver):
     time.sleep(3)
     # 设备列表是 RecyclerView（rvBluetoothList），只渲染可见项：
     # 目标机器排在下面时这里是「压根找不到」，等再久也等不到 —— 找不到就上滑继续找
-    find_with_swipe(
+    #
+    # 点机器序列号有时不报错也没连上（仍停在「查找设备」页），所以要校验：
+    # 点完必须等到编辑页的「新建」出现才算连上，没连上就重新点，最多 3 次
+    click_with_retry(
         driver,
         By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'
-    ).click()
+        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]',
+        success=LOCATORS["create_new"],   # 回到编辑页 = 连接成功
+        name=f"设备 {device_number1}",
+        retries=3,
+        success_timeout=10,
+    )
 
 
 def test_add_all_function(driver):
@@ -717,10 +726,12 @@ def test_photo(driver):
 
     wait_for_element(driver, *LOCATORS["photo_album"]).click()
 
-    wait_for_element(driver, *LOCATORS["photo_check_1"]).click()
-
-    wait_for_element(driver, *LOCATORS["photo_complete"]).click()
+    # app 现在调的是**系统相册**（OPPO ColorOS / 小米 MIUI 的 id、class、desc 全不一样），
+    # 原来的 photo_check_1 / photo_complete 是 app 自带图库的 id，已不再出现。
+    # 交给适配层：识别图库包名 → 逐级候选定位 → 选最新一张 → 等回到 app
+    pick_first_photo(driver)
     wait_for_element(driver, *LOCATORS["menu_crop"]).click()
+    wait_for_element(driver, *LOCATORS["affirm"]).click()
 
 def test_excel(driver):
     """测试Excel功能
@@ -730,10 +741,6 @@ def test_excel(driver):
     """
     wait_for_element(driver, *LOCATORS["add_label"]).click()
     wait_for_element(driver, *LOCATORS["close_preview"]).click()
-    # 左滑
-    swipe_by_element(driver, *LOCATORS["Function Bar_5"],
-                     direction="left"
-                     )
 
     wait_for_element(driver, *LOCATORS["feature_Excel"]).click()
 
@@ -1205,12 +1212,17 @@ def test_print_setting(driver):
     # 点击去连接
     wait_for_element(driver, *LOCATORS["iv_icon_1"]).click()
     wait_for_element(driver, *LOCATORS["go_connect"]).click()
-    # 连接另一台机器（同样：设备列表要滑才能看到目标机器，找不到就上滑继续找）
-    find_with_swipe(
+    # 连接另一台机器（同样：设备列表要滑才能看到目标机器，找不到就上滑继续找；
+    # 点完没连上会重试，连上的标志是回到编辑页）
+    click_with_retry(
         driver,
         By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]'
-    ).click()
+        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]',
+        success=LOCATORS["create_new"],   # 回到编辑页 = 连接成功
+        name=f"设备 {device_number2}",
+        retries=3,
+        success_timeout=10,
+    )
 
 
 def test_DIY(driver):
