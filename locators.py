@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+device_number1 = "T0186A2602270010"   # 第一台打印机编号（官方耗材）
+device_number2 = "T0172A2025071472"   # 第二台打印机编号(自定义耗材)
+device_number3 = "T0148B2607100001"   # 第三台打印机编号（商超耗材）
 """
 元素定位统一管理文件
 ====================
@@ -377,9 +380,9 @@ LOCATORS = {
     "confirm_tv": (AppiumBy.ID, "com.fhit.app_iprinter:id/confirmTV"),                   # 确定
 
     # ================= 家用风新版UI：商品编辑/新建 =================
-    "et_edit_199": (AppiumBy.XPATH, '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit" and @text="1.99"])'),  # 金额输入框(1.99)
+    "et_edit_23": (AppiumBy.XPATH, '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit" and @text="23"])'),  # 金额输入框(23)
     "et_edit_30": (AppiumBy.XPATH, '//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit" and @text="30"]'),      # 金额输入框(30)
-    "et_edit_4": (AppiumBy.XPATH, '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit"])[4]'),  # 第4个输入框
+    "et_edit_3": (AppiumBy.XPATH, '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit"])[3]'),  # 第3个输入框
     "et_edit_1": (AppiumBy.XPATH, '(//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit"])[1]'),  # 第1个输入框
     "et_edit_Q密怀念": (AppiumBy.XPATH, '//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit" and @text="Q密怀念"]'),  # 商品名输入框
     "et_edit_mcd": (AppiumBy.XPATH, '//android.widget.EditText[@resource-id="com.fhit.app_iprinter:id/etEdit" and @text="麦兜星迷你乐趣蛋"]'),  # 商品名输入框2
@@ -387,4 +390,8 @@ LOCATORS = {
     "name_et": (AppiumBy.ID, "com.fhit.app_iprinter:id/nameET"),                         # 品名
     "barcode_et": (AppiumBy.ID, "com.fhit.app_iprinter:id/barcodeET"),                   # 条码
     "price_et": (AppiumBy.ID, "com.fhit.app_iprinter:id/priceET"),                       # 零售价
+    "chose_file": (AppiumBy.XPATH, '//android.widget.TextView[@resource-id="android:id/title" and @text="商品测试数据.xlsx"]'),
+    "device_num1": (AppiumBy.XPATH, f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]'),
+    "device_num2": (AppiumBy.XPATH, f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]'),    
+    "device_num3": (AppiumBy.XPATH, f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number3}"]'),                 # 选择Excel文件
 }

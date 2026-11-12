@@ -318,7 +318,7 @@ class ParamDialog(tk.Toplevel):
     尺寸各异），分页而不是共用一份值，才不会出现「改了 A 文件顺手把 B 文件
     的测试对象也改了」这种误伤。
 
-    「确定并保存」会把这些值**直接改写进 testcases/ 下对应用例文件的那几行**
+    「确定并保存」会把这些值**直接改写进对应用例文件（或 locators.py）的那几行**
     （源码即配置，项目里没有额外的配置文件）。写入前会做语法自检并留备份，
     所以是改完立即生效，不需要重启工具。
     """
@@ -338,7 +338,7 @@ class ParamDialog(tk.Toplevel):
         head.pack(fill="x")
         ttk.Label(
             head,
-            text="这些值会直接写入 testcases/ 下对应用例文件的参数行；改完点「确定并保存」即生效。",
+            text="这些值会直接写入对应用例文件（或 locators.py）的参数行；改完点「确定并保存」即生效。",
             foreground="#666666",
         ).pack(anchor="w")
 
@@ -1141,9 +1141,23 @@ class LauncherApp:
                 names.append(name)
         return names
 
+    def _with_shared_params(self, files):
+        """用例文件之外，再带上 locators.py 这类共享参数文件（保序去重）。
+
+        locators.py 顶部的 device_number* 才是元素定位实际用的值，
+        参数窗口不带它，用户就只会改到不生效的副本。
+        """
+        out = list(files)
+        for name in param_editor.EXTRA_FILES:
+            if name not in out and param_editor.has_block(name):
+                out.append(name)
+        return out
+
     def _open_params(self):
         """随时打开参数窗口（顶部「测试参数」按钮）。"""
-        dlg = ParamDialog(self.root, self._files, on_save=self._log)
+        dlg = ParamDialog(
+            self.root, self._with_shared_params(self._files), on_save=self._log
+        )
         self.root.wait_window(dlg)
         if dlg.result:
             self._log("参数已写入用例源码，本次执行即为新值。", "info")
@@ -1168,7 +1182,7 @@ class LauncherApp:
 
         # 运行前确认参数：目标文件里读不到参数行时，无论如何都要弹一次 ——
         # 免得拿着源码里现有的值跑一整轮，回头才发现测的是另一台机器。
-        target_files = self._files_in_targets(targets)
+        target_files = self._with_shared_params(self._files_in_targets(targets))
         if self.ask_params_var.get() or any(
             not param_editor.has_block(n) for n in target_files
         ):

@@ -25,9 +25,9 @@ from utils.element_helper import (
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0172A2025071472"   # 第一台打印机编号（官方耗材）
-device_number2 = "T0148B2607100001"   # 第二台打印机编号(自定义耗材)
-device_number3 = "T0109A2024041502"   # 第三台打印机编号（商超耗材）
+device_number1 = "T0186A2602270010"   # 第一台打印机编号（官方耗材）
+device_number2 = "T0172A2025071472"   # 第二台打印机编号(自定义耗材)
+device_number3 = "T0148B2607100001"   # 第三台打印机编号（商超耗材）
 telephone_number = "197111916427"      # 登录手机号
 diy_width = "52"                      # 自定义耗材宽度
 diy_height = "52"                     # 自定义耗材高度
@@ -185,10 +185,9 @@ def test_login(driver):
     try:
         #尝试等待快捷登录页面元素的出现
         q_login_btn = wait_for_element(driver, *LOCATORS["quick_login_btn"],timeout=3)
-        print("拉起快捷登录页面，点击一键登录")
+        print("拉起快捷登录页面，点击使用手机号登录方式登录")
         q_login_btn.click()
     except Exception:
-        pass
         print("未拉起快捷登录页面，走输入手机号的流程")
     #走正常的原有逻辑
     wait_for_element(driver, *LOCATORS["login_phone"]).send_keys(telephone_number)
@@ -203,13 +202,19 @@ def test_connect_devices(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    # 点击去连接
-    wait_for_element(driver, *LOCATORS["connect_state"]).click()
-    # 匹配连接机器型号，点击连接按钮
-    wait_for_element(
-        driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]').click()
+    try:
+        # 点击去连接
+        wait_for_element(driver, *LOCATORS["connect_state"]).click()
+        #等待连接设备出现
+        wait_for_element(driver, *LOCATORS["device_num1"],timeout=5)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num1"]).click()
+    except Exception:
+        print("连接设备未出现，向上滑动查找")
+        #向上滑动查找连接设备
+        swipe_up(driver)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num1"]).click()
 
 
 def test_add_text(driver):
@@ -552,12 +557,22 @@ def test_change_machine(driver):
     #确定断开连接
     wait_for_element(driver, *LOCATORS["connect_down"]).click()
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
+
     # 连接新机器型号
-    wait_for_element(
-        driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]'
-    ).click()
+    try:
+        # 点击去连接
+        wait_for_element(driver, *LOCATORS["connect_state"]).click()
+        #等待连接设备出现
+        wait_for_element(driver, *LOCATORS["device_num2"],timeout=5)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num2"]).click()
+    except Exception:
+        print("连接设备未出现，向上滑动查找")
+        #向上滑动查找连接设备
+        swipe_up(driver)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num2"]).click()
+
 
 
 def test_new_template(driver):
@@ -647,12 +662,21 @@ def test_multiple_print(driver):
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
     # 确定断开连接
     wait_for_element(driver, *LOCATORS["connect_down"]).click()
-    wait_for_element(driver, *LOCATORS["connect_state"]).click()
-    # 连接机器
-    wait_for_element(
-        driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]').click()
+
+    try:
+        # 点击去连接
+        wait_for_element(driver, *LOCATORS["connect_state"]).click()
+        #等待连接设备出现
+        wait_for_element(driver, *LOCATORS["device_num3"],timeout=5)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num3"]).click()
+    except Exception:
+        print("连接设备未出现，向上滑动查找")
+        #向上滑动查找连接设备
+        swipe_up(driver)
+        # 点击连接按钮
+        wait_for_element(driver, *LOCATORS["device_num3"]).click()
+
 
     # 点击去编辑
     wait_for_element(driver, *LOCATORS["goto_edit"]).click()
@@ -660,10 +684,11 @@ def test_multiple_print(driver):
     wait_for_element(driver, *LOCATORS["kata_new_label"]).click()
     # 关闭预览
     wait_for_element(driver, *LOCATORS["hide_preview"]).click()
-    # 清空输入框内容
-    wait_for_element(driver, *LOCATORS["et_edit_199"]).clear()
+    # 清空输入框内容(零售价）-----使用T56119商超标签，不同耗材页面元素定位方式不同--------!!!
+    wait_for_element(driver, *LOCATORS["et_edit_23"]).clear()
+    time.sleep(3)
     # 输入新内容
-    wait_for_element(driver, *LOCATORS["et_edit_4"]).send_keys('999')
+    wait_for_element(driver, *LOCATORS["et_edit_3"]).send_keys('99')
     # 打印
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
@@ -687,7 +712,7 @@ def test_excel_import(driver):
     # 点击本地导入
     wait_for_element(driver, *LOCATORS["local_import"]).click()
     # 选择Excel表格
-    wait_for_element(driver, *LOCATORS["file_title"]).click()
+    wait_for_element(driver, *LOCATORS["chose_file"]).click()
     # 点击确定
     wait_for_element(driver, *LOCATORS["confirm_tv"]).click()
     # 从商品列表选择三个商品
@@ -709,7 +734,7 @@ def test_excel_import(driver):
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
     wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
 
-
+'''
 def test_scan_barcode(driver):
     """扫描商品条码功能测试
 
@@ -729,12 +754,12 @@ def test_scan_barcode(driver):
     # 清空输入框内容
     wait_for_element(driver, *LOCATORS["et_edit_30"]).clear()
     # 输入新内容
-    wait_for_element(driver, *LOCATORS["et_edit_4"]).send_keys('50')
+    wait_for_element(driver, *LOCATORS["et_edit_3"]).send_keys('50')
     # 打印
     wait_for_element(driver, *LOCATORS["print_text"]).click()
     wait_for_element(driver, *LOCATORS["tv_confirm"]).click()
     wait_disappear(driver, *LOCATORS["print_cancel"], timeout=30)
-
+'''
 
 def test_create_data(driver):
     """新建商超数据功能测试

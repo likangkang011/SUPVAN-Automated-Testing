@@ -22,6 +22,9 @@
    备份到 ``logs/param_backups/``，改坏了可以 ``python param_editor.py restore``。
 5. **按文件隔离**：两个用例文件面向的测试对象本就不同（T0013… 官方耗材 /
    T0109… 商超耗材），耗材尺寸也不一样。哪个文件填的值只写进哪个文件。
+6. **共享参数文件也纳入**：``EXTRA_FILES``（目前是根目录 ``locators.py``）顶部的
+   ``device_number*`` 同样按这套机制改写 —— 元素定位里的 XPath 用 f-string 引用
+   这些变量，所以「元素定位」用的编号在这里改才生效。
 
 命令行（可选，界面不是唯一入口）：
 
@@ -42,6 +45,11 @@ import tokenize
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 TESTCASE_DIR = os.path.join(PROJECT_ROOT, "testcases")
 BACKUP_DIR = os.path.join(PROJECT_ROOT, "logs", "param_backups")
+
+# 用例目录之外、但也需要「源码直改」的文件（相对项目根目录）。
+# locators.py 顶部存着打印机编号，元素定位的 XPath 用 f-string 引用它们，
+# 所以这里也必须能改，否则界面上改了编号、定位用的还是旧值。
+EXTRA_FILES = ("locators.py",)
 
 # --------------------------------------------------------------------------
 # 字段定义：顺序 + 中文标签，界面与命令行都按这个顺序展示
@@ -78,6 +86,11 @@ SEED = {
         "diy_height": "20",
         "diy_gap": "8",
     },
+    "locators.py": {
+        "device_number1": "T0186A2602270010",
+        "device_number2": "T0172A2025071472",
+        "device_number3": "T0148B2607100001",
+    },
 }
 
 
@@ -85,11 +98,17 @@ SEED = {
 # 基础读写
 # --------------------------------------------------------------------------
 def file_path(fname):
-    """用例文件名 -> 绝对路径（也接受已经是路径的入参）。"""
+    """文件名 -> 绝对路径（用例在 testcases/ 下，locators.py 等在项目根目录）。"""
     s = str(fname)
     if os.path.isabs(s) or os.sep in s or "/" in s:
         return s
-    return os.path.join(TESTCASE_DIR, s)
+    case_cand = os.path.join(TESTCASE_DIR, s)
+    if os.path.isfile(case_cand):
+        return case_cand
+    root_cand = os.path.join(PROJECT_ROOT, s)
+    if os.path.isfile(root_cand):
+        return root_cand
+    return case_cand
 
 
 def _read_text(path):
@@ -174,16 +193,19 @@ def has_block(fname):
 
 
 def case_files():
-    """testcases/ 下所有含参数块的 test_*.py（按名称排序）。"""
+    """testcases/ 下所有含参数块的 test_*.py，外加 EXTRA_FILES 里也含参数块的文件。"""
     out = []
     try:
         names = sorted(os.listdir(TESTCASE_DIR))
     except OSError:
-        return out
+        names = []
     for name in names:
         if name.startswith("test_") and name.endswith(".py") and name != "__init__.py":
             if has_block(name):
                 out.append(name)
+    for name in EXTRA_FILES:
+        if has_block(name):
+            out.append(name)
     return out
 
 
@@ -351,7 +373,7 @@ def restore(fname):
 def _cli_show():
     data = scan()
     if not data:
-        print("testcases/ 下没有找到含参数块的 test_*.py。")
+        print("没有找到含参数块的文件（testcases/test_*.py 或 locators.py）。")
         return 0
     for fname, slots in data.items():
         print("\n[{}]  {}".format(fname, file_path(fname)))
