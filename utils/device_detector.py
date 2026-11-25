@@ -1,3 +1,4 @@
+import os
 import subprocess
 import re
 from typing import List, Dict
@@ -74,10 +75,26 @@ class DeviceDetector:
 
     @staticmethod
     def select_device() -> Dict[str, str]:
-        """交互式选择一个已连接的设备，并返回其配置信息"""
+        """交互式选择一个已连接的设备，并返回其配置信息
+
+        优先级：
+          1) 环境变量 ANDROID_UDID —— 指定就用它（CI / GUI 非交互场景必用，
+             否则多设备时会卡在 input() 上直接 EOFError）
+          2) 只连了一个设备 —— 自动选
+          3) 多个设备 —— 交互选择
+        """
         devices = DeviceDetector.get_connected_devices()
         if not devices:
             raise RuntimeError("未检测到任何已连接的设备，请检查ADB连接")
+
+        wanted = os.getenv("ANDROID_UDID", "").strip()
+        if wanted:
+            if wanted not in devices:
+                raise RuntimeError(
+                    f"ANDROID_UDID={wanted} 不在当前连接的设备列表里：{devices}"
+                )
+            print(f"按 ANDROID_UDID 指定设备: {wanted}")
+            return DeviceDetector.get_device_info(wanted)
 
         # 如果只有一个设备，直接返回其信息
         if len(devices) == 1:
