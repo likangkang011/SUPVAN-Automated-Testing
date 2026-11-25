@@ -1,8 +1,6 @@
 import sys
 import os
 
-from httpcore import TimeoutException
-
 # 添加项目根目录到sys.path，解决conftest导入问题
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

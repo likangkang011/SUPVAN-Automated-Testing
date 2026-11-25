@@ -1,24 +1,36 @@
 # ============================================================
 # SUPVAN 自动化测试项目 —— 顶层依赖清单
 #
+# 环境：Python 3.12（.venv 由 uv 创建，环境内没有 pip）
+#
 # 使用说明：
-#   1. 安装依赖：pip install -r requirements/requirements.txt
+#   1. 安装依赖（任选其一）：
+#        uv pip install -r requirements/requirements.txt
+#        .venv/bin/python -m pip install -r requirements/requirements.txt
 #   2. 更新依赖：开发完成后如需导出，请只保留本文件中的「顶层依赖」，
 #      传递依赖由 pip 自动解析安装，无需手动列出。
 #
 # 原则：
 #   - 仅列项目代码直接 import 的包（顶层依赖），并锁定版本。
-#   - 传递依赖（如 attrs、certifi、urllib3、trio 等）由 pip 自动管理。
+#   - 传递依赖（如 attrs、certifi、urllib3、trio、Jinja2、PySocks 等）
+#     由 pip 自动管理。
+#   - 版本号以 .venv 中实际安装为准（2026-11-25 核对）
 # ============================================================
 
-# Appium 客户端（from appium import ...）
-Appium-Python-Client==5.1.1
+# Appium 客户端（from appium import webdriver / appium.options / appiumby）
+Appium-Python-Client==6.1.8
 
 # Selenium（from selenium import ...）
-selenium==4.33.0
+selenium==4.54.0
 
 # 测试框架
-pytest==8.4.2
+pytest==9.2.0
 
-# HTML 测试报告插件（pytest --html=report.html）
-pytest-html==4.1.1
+# HTML 测试报告插件（conftest.py：from pytest_html import extras）
+pytest-html==4.2.0
+
+# ------------------------------------------------------------
+# 注意：以下依赖不需要写进清单
+#   - tkinter：run_gui.py / ui_theme.py 的 GUI 依赖，属 Python 标准库，
+#     随解释器提供（本环境 Tk 9.0），pip 装不了也不用装。
+# ------------------------------------------------------------
