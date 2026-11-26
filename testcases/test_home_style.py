@@ -13,23 +13,25 @@ import time
 from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from appium.webdriver.common.appiumby import AppiumBy
-from locators import LOCATORS
+from locators import LOCATORS, device_number1, device_number2, device_number3
 from utils.element_helper import (
     wait_for_element,
     wait_clickable,
     wait_visible,
     wait_disappear,
+    click_if_present,
+    click_with_retry,
 )
+from utils.photo_picker import pick_first_photo
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0186A2602270010"   # 第一台打印机编号（官方耗材）
-device_number2 = "T0172A2025071472"   # 第二台打印机编号(自定义耗材)
-device_number3 = "T0148B2607100001"   # 第三台打印机编号（商超耗材）
-telephone_number = "197111916427"      # 登录手机号
-diy_width = "52"                      # 自定义耗材宽度
-diy_height = "52"                     # 自定义耗材高度
-diy_gap = "3"                         # 自定义耗材间隙
+# 打印机编号只在 locators.py 顶部定义一次，本文件通过 LOCATORS["device_num1/2/3"]
+# 使用，不要再在这里定义 device_number*（定义了也不会生效，只会误导）。
+telephone_number = "197111916427"  # 登录手机号
+diy_width = "52"                   # 自定义耗材宽度
+diy_height = "52"                  # 自定义耗材高度
+diy_gap = "3"                      # 自定义耗材间隙
 
 # # ----------------脱机体验机型列表----------------
 # EXPECTED_MODELS = {
@@ -180,13 +182,13 @@ def test_login(driver):
     wait_for_element(driver, *LOCATORS["enter_new_version"]).click()
     # 点击立即登录
     wait_for_element(driver, *LOCATORS["login_btn"]).click()
-    try:
-        #尝试等待快捷登录页面元素的出现
-        q_login_btn = wait_for_element(driver, *LOCATORS["quick_login_btn"],timeout=3)
-        print("拉起快捷登录页面，点击使用手机号登录方式登录")
-        q_login_btn.click()
-    except Exception:
-        print("未拉起快捷登录页面，走输入手机号的流程")
+    # 快捷登录兜底：已缓存账号时 app 先拉起快捷登录页（不是手机号输入页），
+    # 出现就点「其他手机号登录」切过去；没出现就静默跳过
+    # （用 click_if_present 而不是 try/except：可选元素不该往 failure_artifacts 里塞假失败现场）
+    if click_if_present(driver, *LOCATORS["quick_login_btn"], timeout=3):
+        print("拉起快捷登录页面，已切换为手机号登录方式")
+    else:
+        print("未拉起快捷登录页面，直接走手机号登录")
     #走正常的原有逻辑
     wait_for_element(driver, *LOCATORS["login_phone"]).send_keys(telephone_number)
     wait_for_element(driver, *LOCATORS["login_code"]).send_keys('8888')
@@ -200,19 +202,21 @@ def test_connect_devices(driver):
     :param driver: WebDriver实例
     :return: None
     """
-    try:
-        # 点击去连接
-        wait_for_element(driver, *LOCATORS["connect_state"]).click()
-        #等待连接设备出现
-        wait_for_element(driver, *LOCATORS["device_num1"],timeout=5)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num1"]).click()
-    except Exception:
-        print("连接设备未出现，向上滑动查找")
-        #向上滑动查找连接设备
-        swipe_up(driver)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num1"]).click()
+    # 点击去连接
+    wait_for_element(driver, *LOCATORS["connect_state"]).click()
+    # 设备列表是 RecyclerView，只渲染可见项：目标机器排在下面时这里是「压根找不到」，
+    # 等再久也等不到 —— 找不到就上滑继续找（最多 5 次，且滑过头会朝反方向滑回来）。
+    #
+    # 点机器序列号有时不报错也没连上（仍停在「查找设备」页），所以要校验：
+    # 点完必须等到编辑页的「新建」出现才算连上，没连上就重新点，最多 3 次。
+    click_with_retry(
+        driver,
+        *LOCATORS["device_num1"],          # 定位串统一在 locators.py 维护
+        success=LOCATORS["create_new"],    # 回到编辑页 = 连接成功
+        name=f"设备 {device_number1}",
+        retries=3,
+        success_timeout=10,
+    )
 
 
 def test_add_text(driver):
@@ -342,7 +346,6 @@ def test_add_symbol(driver):
     # 收起功能区域
     wait_for_element(driver, *LOCATORS["label_produce_close"]).click()
 
-''' 先注释掉：选择手机图片时手机系统不同，方式不同会报错（同Excel）
 def test_ai_photo_print(driver):
     """AI拍照打印功能测试
 
@@ -359,13 +362,11 @@ def test_ai_photo_print(driver):
     wait_for_element(driver, *LOCATORS["kata_ai_photo"]).click()
     # 从相册选择
     wait_for_element(driver, *LOCATORS["choose_album"]).click()
-    # 选择相册的第一张相片
-    wait_for_element(driver, *LOCATORS["photo_btn_check_1"]).click()
-    # 点击已完成
-    wait_for_element(driver, *LOCATORS["photo_complete"]).click()
+    # 系统相册跨 ROM 适配：识别图库包名 → 逐级候选定位 → 选最新一张 → 等回到 app
+    # （photo_btn_check_1 / photo_complete 是 app 自带图库的 id，已不再出现）
+    pick_first_photo(driver)
     # 点击确定
     wait_for_element(driver, *LOCATORS["appcompat_linear_layout"]).click()
-'''
 
 '''
 def test_template(driver):
@@ -476,8 +477,6 @@ def test_add_table(driver):
     # 点击确定按钮
     wait_for_element(driver, *LOCATORS["table_affirm"]).click()
 
-'''
-
 def test_add_photo(driver):
     """添加图片功能测试
 
@@ -496,14 +495,12 @@ def test_add_photo(driver):
     wait_for_element(driver, *LOCATORS["kata_photo"]).click()
     # 从相册选择
     wait_for_element(driver, *LOCATORS["photo_album"]).click()
-    # 选择第一张图片
-    wait_for_element(driver, *LOCATORS["photo_check_1"]).click()
-    # 点击已完成
-    wait_for_element(driver, *LOCATORS["photo_complete"]).click()
+    # app 现在调的是**系统相册**（OPPO ColorOS / 小米 MIUI 的 id、class、desc 全不一样），
+    # 原来的 photo_check_1 / photo_complete 是 app 自带图库的 id，已不再出现。
+    # 交给适配层：识别图库包名 → 逐级候选定位 → 选最新一张 → 等回到 app
+    pick_first_photo(driver)
     # 点击确定
     wait_for_element(driver, *LOCATORS["appcompat_linear_layout"]).click()
-    
-'''
 
 def test_save_template(driver):
     """保存模板功能测试
@@ -557,19 +554,17 @@ def test_change_machine(driver):
     wait_for_element(driver, *LOCATORS["connect_state"]).click()
 
     # 连接新机器型号
-    try:
-        # 点击去连接
-        wait_for_element(driver, *LOCATORS["connect_state"]).click()
-        #等待连接设备出现
-        wait_for_element(driver, *LOCATORS["device_num2"],timeout=5)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num2"]).click()
-    except Exception:
-        print("连接设备未出现，向上滑动查找")
-        #向上滑动查找连接设备
-        swipe_up(driver)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num2"]).click()
+    # 注意：这里不要再补一次 connect_state 的点击 —— 上面那次点完已经在「查找设备」页，
+    # 再点一次会因为找不到 tvDeviceName 白等 10s 才抛错（原写法就是靠这个异常进 except 的）。
+    # 列表里排在下面的机器找不到会自动上滑；点完必须真的连上（编辑页「新建」出现）才算成功。
+    click_with_retry(
+        driver,
+        *LOCATORS["device_num2"],
+        success=LOCATORS["create_new"],
+        name=f"设备 {device_number2}",
+        retries=3,
+        success_timeout=10,
+    )
 
 
 
@@ -661,19 +656,17 @@ def test_multiple_print(driver):
     # 确定断开连接
     wait_for_element(driver, *LOCATORS["connect_down"]).click()
 
-    try:
-        # 点击去连接
-        wait_for_element(driver, *LOCATORS["connect_state"]).click()
-        #等待连接设备出现
-        wait_for_element(driver, *LOCATORS["device_num3"],timeout=5)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num3"]).click()
-    except Exception:
-        print("连接设备未出现，向上滑动查找")
-        #向上滑动查找连接设备
-        swipe_up(driver)
-        # 点击连接按钮
-        wait_for_element(driver, *LOCATORS["device_num3"]).click()
+    # 点击去连接（断开后这一下才进「查找设备」页，不能省）
+    wait_for_element(driver, *LOCATORS["connect_state"]).click()
+    # 商超耗材那台机器排在列表下面，找不到会自动上滑；点完必须真的连上才算成功
+    click_with_retry(
+        driver,
+        *LOCATORS["device_num3"],
+        success=LOCATORS["create_new"],
+        name=f"设备 {device_number3}",
+        retries=3,
+        success_timeout=10,
+    )
 
 
     # 点击去编辑

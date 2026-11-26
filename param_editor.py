@@ -4,11 +4,11 @@
 本项目里「会随测试对象变化」的变量（打印机编号、登录手机号、耗材尺寸 …）
 **就写在用例文件顶部**，本模块负责把界面上填的新值**直接改写回源码那几行**。
 
-    testcases/test_release.py::
+    testcases/test_professional_style.py::
 
         # ----------------统一管理变量----------------
-        device_number1 = "T0013B2507037084"  # 第一台打印机编号（官方耗材）
-        device_number2 = "T0024B2024071849"  # 第二台打印机编号(自定义耗材)
+        telephone_number = "17777786604"     # 登录手机号
+        diy_width = "50"                     # 自定义耗材宽度
         ...
 
 设计要点（都是为了让「改源码」这件事不至于失控）：
@@ -20,17 +20,18 @@
 3. **写完先自检**：新内容先过一遍 ``ast.parse``，语法不合法直接放弃，绝不落盘。
 4. **原子替换 + 留备份**：先写同目录临时文件再 ``os.replace``；改写前把原文件
    备份到 ``logs/param_backups/``，改坏了可以 ``python param_editor.py restore``。
-5. **按文件隔离**：两个用例文件面向的测试对象本就不同（T0013… 官方耗材 /
-   T0109… 商超耗材），耗材尺寸也不一样。哪个文件填的值只写进哪个文件。
+5. **按文件隔离**：哪个文件填的值只写进哪个文件。两个用例文件的耗材尺寸本来就
+   不同（家用风 52×52 间隙 3 / 专业版 50×30 间隙 3），互不影响。
 6. **共享参数文件也纳入**：``EXTRA_FILES``（目前是根目录 ``locators.py``）顶部的
-   ``device_number*`` 同样按这套机制改写 —— 元素定位里的 XPath 用 f-string 引用
-   这些变量，所以「元素定位」用的编号在这里改才生效。
+   ``device_number*`` 是**全项目唯一一处定义** —— 元素定位里的 XPath 用 f-string
+   引用它们，用例文件通过 ``from locators import ...`` 取用。所以「元素定位」用的
+   编号只在这里改才生效；用例文件里不要再写同名副本（写了也是死代码）。
 
 命令行（可选，界面不是唯一入口）：
 
     python param_editor.py show                    # 列出各文件当前值与所在行号
-    python param_editor.py set diy_width=40 --file test_release.py
-    python param_editor.py restore --file test_release.py   # 回滚到最近一次备份
+    python param_editor.py set diy_width=40 --file test_professional_style.py
+    python param_editor.py restore --file test_professional_style.py   # 回滚到最近一次备份
 """
 
 import argparse
@@ -67,24 +68,21 @@ FIELDS = (
 FIELD_LABELS = dict(FIELDS)
 FIELD_ORDER = [k for k, _ in FIELDS]
 
-# 初始值 = 各用例文件改造前的原始硬编码值，「恢复默认值」用它们
+# 初始值 = 各用例文件改造前的原始硬编码值，「恢复默认值」用它们。
+# 注意：device_number* 已统一收敛到 locators.py（全项目唯一数据源），
+# 用例文件不再持有副本，所以这里的 test_*.py 条目不包含它。
 SEED = {
-    "test_release.py": {
-        "device_number1": "T0013B2507037084",
-        "device_number2": "T0024B2024071849",
+    "test_professional_style.py": {
         "telephone_number": "17777786604",
         "diy_width": "50",
         "diy_height": "30",
         "diy_gap": "3",
     },
-    "test_release_home.py": {
-        "device_number1": "T0109A2024041502",
-        "device_number2": "T0171A2504150001",
-        "device_number3": "T0109A2024041502",
-        "telephone_number": "17777786604",
-        "diy_width": "30",
-        "diy_height": "20",
-        "diy_gap": "8",
+    "test_home_style.py": {
+        "telephone_number": "197111916427",
+        "diy_width": "52",
+        "diy_height": "52",
+        "diy_gap": "3",
     },
     "locators.py": {
         "device_number1": "T0186A2602270010",
@@ -311,6 +309,12 @@ def apply(mapping):
         updates, errs = _clean_values(name, values, slots)
         errors.extend(errs)
         if not updates:
+            continue
+
+        # 先按「值」判断有没有变化：_render 会按新宽度重排整块注释的对齐列，
+        # 哪怕值一个没改，渲染结果也和原文不同 —— 只比较文本会误判成「有改动」，
+        # 于是白写一次文件、白留一份备份，日志还会误报「已写入源码」。
+        if all(updates.get(k, s["value"]) == s["value"] for k, s in slots.items()):
             continue
 
         new_src = _render(src, slots, updates)

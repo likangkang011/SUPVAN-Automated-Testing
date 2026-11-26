@@ -14,7 +14,7 @@ import time
 from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from appium.webdriver.common.appiumby import AppiumBy
-from locators import LOCATORS
+from locators import LOCATORS, device_number1, device_number2
 from utils.element_helper import (
     wait_for_element,
     wait_clickable,
@@ -33,12 +33,12 @@ from utils.photo_picker import pick_first_photo
 
 
 # ----------------统一管理变量----------------
-device_number1 = "T0021B2312264398"  # 第一台打印机编号（官方耗材）
-device_number2 = "T0013B2411226666"  # 第二台打印机编号(自定义耗材)
-telephone_number = "17777786604"     # 登录手机号
-diy_width = "50"                     # 自定义耗材宽度
-diy_height = "30"                    # 自定义耗材高度
-diy_gap = "3"                        # 自定义耗材间隙
+# 打印机编号只在 locators.py 顶部定义一次（元素定位的 XPath 用 f-string 引用它），
+# 这里从 locators 导入，仅用于日志文案；不要在本文件再定义同名变量。
+telephone_number = "17777786604"  # 登录手机号
+diy_width = "50"                  # 自定义耗材宽度
+diy_height = "30"                 # 自定义耗材高度
+diy_gap = "3"                     # 自定义耗材间隙
 
 """
 # ----------------脱机体验机型列表----------------
@@ -320,8 +320,7 @@ def test_connect_devices(driver):
     # 点完必须等到编辑页的「新建」出现才算连上，没连上就重新点，最多 3 次
     click_with_retry(
         driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number1}"]',
+        *LOCATORS["device_num1"],         # 定位串统一在 locators.py 维护
         success=LOCATORS["create_new"],   # 回到编辑页 = 连接成功
         name=f"设备 {device_number1}",
         retries=3,
@@ -397,6 +396,13 @@ def test_loginin(driver):
     wait_for_element(driver, *LOCATORS["iv_icon_3"]).click()
 
     wait_for_element(driver, *LOCATORS["personal_info_enter"]).click()
+    # 快捷登录兜底：已缓存账号时 app 先拉起快捷登录页（不是手机号输入页），
+    # 出现就点「其他手机号登录」切过去；没出现就静默跳过
+    # （用 click_if_present 而不是 try/except：可选元素不该往 failure_artifacts 里塞假失败现场）
+    if click_if_present(driver, *LOCATORS["quick_login_btn"], timeout=3):
+        print("拉起快捷登录页面，已切换为手机号登录方式")
+    else:
+        print("未拉起快捷登录页面，直接走手机号登录")
     wait_for_element(driver, *LOCATORS["login_phone"]).send_keys(telephone_number)
     wait_for_element(driver, *LOCATORS["login_code"]).send_keys('8888')
     wait_for_element(driver, *LOCATORS["login_agree"]).click()
@@ -1216,8 +1222,7 @@ def test_print_setting(driver):
     # 点完没连上会重试，连上的标志是回到编辑页）
     click_with_retry(
         driver,
-        By.XPATH,
-        f'//android.widget.TextView[@resource-id="com.fhit.app_iprinter:id/adapter_find_device_mac" and @text="{device_number2}"]',
+        *LOCATORS["device_num2"],         # 定位串统一在 locators.py 维护
         success=LOCATORS["create_new"],   # 回到编辑页 = 连接成功
         name=f"设备 {device_number2}",
         retries=3,

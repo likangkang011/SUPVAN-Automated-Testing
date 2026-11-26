@@ -49,8 +49,8 @@ def _resolve_arg_against_root(arg, project_root):
     """把「以启动目录为基准找不到」的相对路径，改按项目根重新解析。
 
     pytest 解析命令行里的相对路径时，基准是**启动目录（cwd）**，不是 rootdir。
-    所以在 testcases/ 里执行 `pytest testcases/test_release.py` 会直接报
-    `ERROR: file or directory not found: testcases/test_release.py`
+    所以在 testcases/ 里执行 `pytest testcases/test_home_style.py` 会直接报
+    `ERROR: file or directory not found: testcases/test_home_style.py`
     —— 文件明明在，rootdir 也认对了，只是路径重复拼接了一层目录。
 
     只在「相对 cwd 不存在、相对项目根存在」时改写，真正写错的路径仍照常报错。
