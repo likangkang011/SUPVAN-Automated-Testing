@@ -14,12 +14,15 @@ logs/*.log
 logs/*.png
 logs/screenshots/
 logs/failure_artifacts/
+logs/failures/
 logs/param_backups/
 logs/ui_dump/
 reports/*.html
 
 # 忽略本地工作数据
 .workbuddy/
+# 参数历史（本机用过的打印机编号，每台机器各记各的）
+config/param_history.json
 
 # 忽略 macOS 系统文件
 .DS_Store

@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import json
 import subprocess
 import pytest
 import datetime
@@ -391,10 +392,13 @@ def driver():
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """测试失败时自动截图，并把截图附加到 pytest-html 报告里。
+    """测试失败时留一份「失败现场」：截图 + 控件树 + meta.json。
 
-    - 截图保存到 logs/screenshots/
-    - 生成 HTML 报告时（pytest --html=report.html）截图会内嵌到报告
+    只存截图往往判不出「为什么没找到这个元素」；把当时的 page_source 一起留下，
+    GUI 的「失败现场」就能离线打开那一屏、在元素拾取里点着看 ——
+    真机早就翻页了，这份快照还在。
+
+    产物：logs/failures/<时间>_<用例名>/{screenshot.png, page.xml, meta.json}
     """
     outcome = yield
     report = outcome.get_result()
@@ -407,17 +411,57 @@ def pytest_runtest_makereport(item, call):
     if driver is None:
         return
 
+    stamp = datetime.datetime.now()
+    test_name = item.name.replace("/", "_").replace("::", "_")
+    folder = os.path.join(
+        os.getcwd(), "logs", "failures", f"{stamp:%Y%m%d_%H%M%S}_{test_name}"
+    )
+    shot_name, page_name = "screenshot.png", "page.xml"
+    screenshot_path = os.path.join(folder, shot_name)
+
     try:
-        screenshots_dir = os.path.join(os.getcwd(), "logs", "screenshots")
-        os.makedirs(screenshots_dir, exist_ok=True)
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        test_name = item.name.replace("/", "_").replace("::", "_")
-        screenshot_path = os.path.join(screenshots_dir, f"{test_name}_{timestamp}.png")
+        os.makedirs(folder, exist_ok=True)
         driver.save_screenshot(screenshot_path)
         logger.info("📷 失败截图已保存：%s", screenshot_path)
     except Exception as e:
         logger.warning("失败截图保存失败：%s", e)
         return
+
+    meta = {
+        "time": stamp.isoformat(timespec="seconds"),
+        "nodeid": item.nodeid,
+        "test": test_name,
+        "screenshot": shot_name,
+    }
+    # 窗口尺寸是离线复盘的必需项：截图坐标要按它换算回屏幕坐标才能命中控件
+    try:
+        size = driver.get_window_size()
+        meta["window"] = {
+            "width": int(size.get("width", 0)),
+            "height": int(size.get("height", 0)),
+        }
+    except Exception:
+        pass
+    for key, getter in (("activity", lambda: driver.current_activity),
+                        ("udid", lambda: (driver.capabilities or {}).get("udid", ""))):
+        try:
+            meta[key] = getter()
+        except Exception:
+            pass
+
+    try:
+        with open(os.path.join(folder, page_name), "w", encoding="utf-8") as f:
+            f.write(driver.page_source or "")
+        meta["page_source"] = page_name
+    except Exception as e:
+        logger.warning("控件树保存失败：%s", e)
+
+    try:
+        with open(os.path.join(folder, "meta.json"), "w", encoding="utf-8") as f:
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+        logger.info("🗂 失败现场已存档：%s", folder)
+    except Exception as e:
+        logger.warning("meta.json 写入失败：%s", e)
 
     # 附加到 pytest-html 报告（需安装 pytest-html）
     try:
