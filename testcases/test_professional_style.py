@@ -36,7 +36,7 @@ from utils.photo_picker import pick_first_photo
 # 打印机编号只在 locators.py 顶部定义一次（元素定位的 XPath 用 f-string 引用它），
 # 这里从 locators 导入，仅用于日志文案；不要在本文件再定义同名变量。
 telephone_number = "17777786604"  # 登录手机号
-diy_width = "50"                  # 自定义耗材宽度
+diy_width = "40"                  # 自定义耗材宽度
 diy_height = "30"                 # 自定义耗材高度
 diy_gap = "3"                     # 自定义耗材间隙
 
